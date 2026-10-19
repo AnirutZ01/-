@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคำนวณสต็อกรายวัน (Multi-Container)</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #2980b9;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --border: #e2e8f0;
+            --success: #27ae60;
+            --danger: #e74c3c;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 12px;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 6px;
+        }
+
+        .item-group {
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .item-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .item-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #4a5568;
+        }
+
+        .container-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        select, input {
+            padding: 8px 10px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        select {
+            flex: 1.2;
+            background-color: #fff;
+        }
+
+        input[type="number"] {
+            flex: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-add {
+            background: #4a5568;
+            margin-top: 4px;
+        }
+
+        .btn-remove {
+            background: var(--danger);
+            padding: 8px 10px;
+            border-radius: 8px;
+        }
+
+        .summary-card {
+            background: #ebf8ff;
+            border: 1px solid #bee3f8;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-value {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 10px 16px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .footer-bar .btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 1rem;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+
+        .btn-reset {
+            background: #718096;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🍹 เครื่องคิดเลขสต็อกรายวัน (Multi-Container)</h1>
+    </div>
+
+    <!-- ส่วนที่ 1: รายการวัตถุดิบชั่งน้ำหนักแบบหลายภาชนะ -->
+    <div id="items-container"></div>
+
+    <!-- ส่วนสรุปผลการคำนวณ -->
+    <div class="card summary-card">
+        <div class="card-title">
+            <span>📊 สรุปปริมาณคงเหลือสุทธิ</span>
+        </div>
+        <div id="summary-list"></div>
+    </div>
+
+    <!-- แถบปุ่มกดด้านล่าง -->
+    <div class="footer-bar">
+        <button class="btn btn-reset" onclick="resetForm()">ล้างข้อมูล</button>
+        <button class="btn" onclick="calculateAll()" style="background: var(--success);">คำนวณสต็อก</button>
+    </div>
+
+    <script>
+        // กำหนดรายการภาชนะและ Tare Weights Standard
+        const CONTAINERS = {
+            'none': { name: 'ไม่คิดน้ำหนักภาชนะ (0g)', weight: 0 },
+            'shaker': { name: 'เชคเกอร์ (103.7g)', weight: 103.7 },
+            'jug_small': { name: 'เหยือกเล็ก (121.3g)', weight: 121.3 },
+            'jug_large': { name: 'เหยือกใหญ่ (359g)', weight: 359 },
+            'squeeze_small': { name: 'ขวดบีบเล็ก (72g)', weight: 72 },
+            'squeeze_large': { name: 'ขวดบีบใหญ่ (100g)', weight: 100 },
+            'bs_bottle': { name: 'ขวด Butterscotch เฉพาะ', weight: 85 }
+        };
+
+        // รายการวัตถุดิบทั้งหมดที่ต้องการบันทึกสต็อกรายวัน
+        const ITEMS = [
+            { id: 'base_prep', name: 'Base Prep / ซอสเบส', defaultContainer: 'jug_large' },
+            { id: 'chocolate', name: 'Chocolate Prep / ช็อกโกแลต', defaultContainer: 'squeeze_large' },
+            { id: 'butterscotch', name: 'Butterscotch Sauce', defaultContainer: 'bs_bottle' },
+            { id: 'caramel', name: 'Caramel Syrup', defaultContainer: 'squeeze_small' },
+            { id: 'vanilla', name: 'Vanilla Syrup', defaultContainer: 'squeeze_small' },
+            { id: 'hazelnut', name: 'Hazelnut Syrup', defaultContainer: 'squeeze_small' },
+            { id: 'matcha', name: 'Matcha Base', defaultContainer: 'jug_small' },
+            { id: 'thai_tea', name: 'Thai Tea Base', defaultContainer: 'jug_large' },
+            { id: 'milk', name: 'Fresh Milk / นมสด', defaultContainer: 'none' }
+        ];
+
+        // สร้าง UI รายการวัตถุดิบ
+        function renderItems() {
+            const containerEl = document.getElementById('items-container');
+            containerEl.innerHTML = '';
+
+            ITEMS.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.id = `card-${item.id}`;
+
+                card.innerHTML = `
+                    <div class="card-title">
+                        <span>${item.name}</span>
+                        <button class="btn btn-add" onclick="addContainerRow('${item.id}', '${item.defaultContainer}')">+ เพิ่มขวด/ภาชนะ</button>
+                    </div>
+                    <div id="rows-${item.id}"></div>
+                `;
+
+                containerEl.appendChild(card);
+                // เพิ่มแถวแรกเริ่มต้นให้อัตโนมัติ 1 แถว
+                addContainerRow(item.id, item.defaultContainer);
+            });
+        }
+
+        // ฟังก์ชันเพิ่มแถวใส่ภาชนะ + น้ำหนักรวม
+        function addContainerRow(itemId, defaultContainerKey = 'none') {
+            const rowsContainer = document.getElementById(`rows-${itemId}`);
+            const rowId = Date.now() + Math.random().toString(36).substr(2, 4);
+
+            const row = document.createElement('div');
+            row.className = 'container-row';
+            row.id = `row-${rowId}`;
+
+            let containerOptionsHTML = '';
+            for (const [key, c] of Object.entries(CONTAINERS)) {
+                const selected = key === defaultContainerKey ? 'selected' : '';
+                containerOptionsHTML += `<option value="${key}" ${selected}>${c.name}</option>`;
+            }
+
+            row.innerHTML = `
+                <select class="container-select">
+                    ${containerOptionsHTML}
+                </select>
+                <input type="number" class="gross-weight" placeholder="น้ำหนักรวม (g)" step="0.1" inputmode="decimal">
+                <button class="btn btn-remove" onclick="removeRow('${row.id}')">✕</button>
+            `;
+
+            rowsContainer.appendChild(row);
+        }
+
+        // ลบแถวภาชนะ
+        function removeRow(rowId) {
+            const row = document.getElementById(`row-${rowId}`);
+            if (row) {
+                row.remove();
+            }
+        }
+
+        // คำนวณสต็อกสุทธิทุกตัว
+        function calculateAll() {
+            const summaryList = document.getElementById('summary-list');
+            summaryList.innerHTML = '';
+
+            ITEMS.forEach(item => {
+                const card = document.getElementById(`card-${item.id}`);
+                const rows = card.querySelectorAll('.container-row');
+                
+                let totalNetWeight = 0;
+
+                rows.forEach(row => {
+                    const select = row.querySelector('.container-select');
+                    const input = row.querySelector('.gross-weight');
+
+                    const grossWeight = parseFloat(input.value) || 0;
+                    const containerKey = select.value;
+                    const tareWeight = CONTAINERS[containerKey] ? CONTAINERS[containerKey].weight : 0;
+
+                    if (grossWeight > 0) {
+                        const netWeight = Math.max(0, grossWeight - tareWeight);
+                        totalNetWeight += netWeight;
+                    }
+                });
+
+                // แสดงผลในส่วนสรุป
+                const summaryItem = document.createElement('div');
+                summaryItem.className = 'summary-item';
+                summaryItem.innerHTML = `
+                    <span>${item.name}</span>
+                    <span class="summary-value">${totalNetWeight.toFixed(1)} g</span>
+                `;
+                summaryList.appendChild(summaryItem);
+            });
+        }
+
+        // ล้างข้อมูลทั้งหมดในฟอร์ม
+        function resetForm() {
+            if (confirm('คุณต้องการล้างข้อมูลน้ำหนักที่กรอกไว้ทั้งหมดใช่หรือไม่?')) {
+                renderItems();
+                document.getElementById('summary-list').innerHTML = '';
+            }
+        }
+
+        // เรียกใช้งานเริ่มต้น
+        renderItems();
+    </script>
+</body>
+</html>
