@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบคำนวณและเช็กสต็อกรายอาทิตย์ (Weekly Stock V2)</title>
+    <title>ระบบคำนวณและเช็กสต็อกรายอาทิตย์ (Weekly Stock V2 Full)</title>
     <style>
         :root {
             --bg-color: #f4f6f9;
@@ -11,6 +11,7 @@
             --primary: #2c3e50;
             --accent: #27ae60;
             --danger: #e74c3c;
+            --warning: #f39c12;
             --text-main: #333333;
             --text-muted: #666666;
             --border-color: #e0e0e0;
@@ -27,11 +28,11 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             padding: 12px;
-            padding-bottom: 80px;
+            padding-bottom: 100px;
         }
 
         .container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto;
         }
 
@@ -55,11 +56,24 @@
             opacity: 0.8;
         }
 
+        .section-banner {
+            background: #e9ecef;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px 0 10px 0;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .card {
             background: var(--card-bg);
             border-radius: 12px;
             padding: 14px;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             border: 1px solid var(--border-color);
         }
@@ -68,13 +82,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             border-bottom: 2px solid var(--bg-color);
-            padding-bottom: 8px;
+            padding-bottom: 6px;
         }
 
         .card-title {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--primary);
         }
@@ -120,12 +134,6 @@
             font-size: 0.85rem;
             cursor: pointer;
             margin-top: 4px;
-            transition: all 0.2s;
-        }
-
-        .btn-add:active {
-            background: var(--accent);
-            color: white;
         }
 
         .btn-del {
@@ -137,19 +145,53 @@
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .section-banner {
-            background: #e9ecef;
-            padding: 10px 14px;
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px id #eee;
+        }
+
+        .summary-box {
+            background: #2c3e50;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+        }
+
+        .order-needed {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .order-ok {
+            color: #2ecc71;
+        }
+
+        .btn-copy {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
             border-radius: 8px;
             font-weight: bold;
-            color: var(--primary);
-            margin: 20px 0 10px 0;
             font-size: 1rem;
+            margin-top: 14px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -157,12 +199,26 @@
 
 <div class="container">
     <header>
-        <h1>📋 คำนวณสต็อกรายอาทิตย์ (Weekly V2)</h1>
-        <p>รองรับเพิ่มหลายขวด/ภาชนะทุกรายการ หัก Tare อัตโนมัติ</p>
+        <h1>📋 คำนวณสต็อกรายอาทิตย์ (Weekly V2 Full)</h1>
+        <p>นับของหลายขวด + คำนวณสูตรขาย + สรุปยอดสั่งซื้อ</p>
     </header>
 
-    <div id="weekly-items-container">
-        <!-- JS จะมาสร้างการ์ดวัตถุดิบทั้งหมดตรงนี้ -->
+    <!-- ส่วนที่ 1: การนับสต็อกวัตถุดิบหน้าร้าน -->
+    <div id="weekly-items-container"></div>
+
+    <!-- ส่วนที่ 2: ประมาณการยอดขาย (จำนวนแก้ว) -->
+    <div class="section-banner">
+        <span>🥤 ประมาณการยอดขายสัปดาห์นี้ (จำนวนแก้ว)</span>
+    </div>
+    <div class="card" id="recipe-inputs-container">
+        <!-- JS จะมาเจนช่องใส่ยอดขายตรงนี้ -->
+    </div>
+
+    <!-- ส่วนที่ 3: สรุปผลการคำนวณและรายการสั่งซื้อ -->
+    <div class="summary-box">
+        <h3 style="margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 8px;">📊 สรุปวัตถุดิบที่ต้องสั่งเพิ่ม</h3>
+        <div id="summary-report-list"></div>
+        <button class="btn-copy" onclick="copyReport()">📋 คัดลอกรายงานส่ง LINE</button>
     </div>
 </div>
 
@@ -178,58 +234,68 @@ const TARES = {
     "butterscotch_jar": { name: "โถ Butterscotch (145.0g)", weight: 145.0 }
 };
 
-// รายการวัตถุดิบรายอาทิตย์ทั้งหมด 29 รายการ
+// 1. รายการวัตถุดิบสต็อก (29 รายการ)
 const WEEKLY_ITEMS = [
-    // หมวดเบสเตรียม (Base Preps)
-    { id: "base_choc", name: "1. ช็อกโกแลตเบส (Chocolate Base)", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
-    { id: "base_thai_tea", name: "2. เบสชาไทย (Thai Tea Base)", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
-    { id: "base_green_tea", name: "3. เบสชาเขียว (Green Tea Base)", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
-    { id: "base_earl_grey", name: "4. เบสชาอาร์ลเกรย์ (Earl Grey Base)", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
-    { id: "base_black_tea", name: "5. เบสชาดำ (Black Tea Base)", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
-    { id: "base_coffee_coldbrew", name: "6. เบสกาแฟสกัดเย็น (Cold Brew)", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
-    { id: "base_matcha", name: "7. เบสพรีเมียมมัทฉะ (Matcha Base)", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_small" },
-    { id: "base_hojicha", name: "8. เบสโฮจิฉะ (Hojicha Base)", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_small" },
-    { id: "base_cocoa", name: "9. เบสโกโก้เข้มข้น (Cocoa Base)", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_small" },
-    { id: "base_taro", name: "10. เบสเผือกหอม (Taro Base)", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_small" },
-    { id: "base_butterscotch", name: "11. บัตเตอร์สก็อตช์ซอส (Butterscotch)", category: "เบสเตรียม (Base Preps)", defaultTare: "butterscotch_jar" },
-    { id: "base_caramel_sauce", name: "12. คาราเมลซอส (Caramel Sauce)", category: "เบสเตรียม (Base Preps)", defaultTare: "squeeze_lg" },
-    { id: "base_vanilla_cream", name: "13. วิปครีมวานิลลา (Vanilla Cream)", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
-    { id: "base_fruity_syrup", name: "14. ไซรัปผลไม้รวม (Fruity Mix)", category: "เบสเตรียม (Base Preps)", defaultTare: "squeeze_sm" },
+    { id: "base_choc", name: "1. ช็อกโกแลตเบส", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
+    { id: "base_thai_tea", name: "2. เบสชาไทย", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
+    { id: "base_green_tea", name: "3. เบสชาเขียว", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
+    { id: "base_earl_grey", name: "4. เบสชาอาร์ลเกรย์", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
+    { id: "base_black_tea", name: "5. เบสชาดำ", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
+    { id: "base_coffee_coldbrew", name: "6. เบสกาแฟ Cold Brew", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
+    { id: "base_matcha", name: "7. เบสพรีเมียมมัทฉะ", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_small" },
+    { id: "base_hojicha", name: "8. เบสโฮจิฉะ", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_small" },
+    { id: "base_cocoa", name: "9. เบสโกโก้เข้มข้น", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_small" },
+    { id: "base_taro", name: "10. เบสเผือกหอม", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_small" },
+    { id: "base_butterscotch", name: "11. บัตเตอร์สก็อตช์ซอส", category: "เบสเตรียม (Base Preps)", defaultTare: "butterscotch_jar" },
+    { id: "base_caramel_sauce", name: "12. คาราเมลซอส", category: "เบสเตรียม (Base Preps)", defaultTare: "squeeze_lg" },
+    { id: "base_vanilla_cream", name: "13. วิปครีมวานิลลา", category: "เบสเตรียม (Base Preps)", defaultTare: "jug_large" },
+    { id: "base_fruity_syrup", name: "14. ไซรัปผลไม้รวม", category: "เบสเตรียม (Base Preps)", defaultTare: "squeeze_sm" },
 
-    // หมวดไซรัป (Syrups)
-    { id: "syr_vanilla", name: "15. ไซรัปวานิลลา (Vanilla Syrup)", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
-    { id: "syr_caramel", name: "16. ไซรัปคาราเมล (Caramel Syrup)", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
-    { id: "syr_hazelnut", name: "17. ไซรัปเฮเซลนัท (Hazelnut Syrup)", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
-    { id: "syr_peach", name: "18. ไซรัปพีช (Peach Syrup)", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
-    { id: "syr_strawberry", name: "19. ไซรัปสตรอเบอร์รี่ (Strawberry)", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
-    { id: "syr_yuzu", name: "20. ไซรัปยูสุ (Yuzu Syrup)", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
-    { id: "syr_mint", name: "21. ไซรัปมิ้นท์ (Mint Syrup)", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
-    { id: "syr_rose", name: "22. ไซรัปกุหลาบ (Rose Syrup)", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
-    { id: "syr_lychee", name: "23. ไซรัป ลิ้นจี่ (Lychee Syrup)", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
-    { id: "syr_simple", name: "24. น้ำเชื่อมไซรัป (Simple Syrup)", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_lg" },
+    { id: "syr_vanilla", name: "15. ไซรัปวานิลลา", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
+    { id: "syr_caramel", name: "16. ไซรัปคาราเมล", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
+    { id: "syr_hazelnut", name: "17. ไซรัปเฮเซลนัท", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
+    { id: "syr_peach", name: "18. ไซรัปพีช", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
+    { id: "syr_strawberry", name: "19. ไซรัปสตรอเบอร์รี่", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
+    { id: "syr_yuzu", name: "20. ไซรัปยูสุ", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
+    { id: "syr_mint", name: "21. ไซรัปมิ้นท์", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
+    { id: "syr_rose", name: "22. ไซรัปกุหลาบ", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
+    { id: "syr_lychee", name: "23. ไซรัป ลิ้นจี่", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_sm" },
+    { id: "syr_simple", name: "24. น้ำเชื่อมไซรัป", category: "หมวดไซรัป (Syrups)", defaultTare: "squeeze_lg" },
 
-    // หมวดของแห้งและวัตถุดิบสต็อก
-    { id: "raw_milk", name: "25. นมสด (Fresh Milk)", category: "หมวดของสด/วัตถุดิบหลัก", defaultTare: "jug_large" },
-    { id: "raw_condensed_milk", name: "26. นมข้นหวาน (Condensed Milk)", category: "หมวดของสด/วัตถุดิบหลัก", defaultTare: "squeeze_lg" },
-    { id: "raw_evap_milk", name: "27. นมข้นจืด (Evaporated Milk)", category: "หมวดของสด/วัตถุดิบหลัก", defaultTare: "squeeze_lg" },
-    { id: "raw_choc_powder", name: "28. ผงช็อกโกแลต (Choc Powder)", category: "หมวดของสด/วัตถุดิบหลัก", defaultTare: "none" },
-    { id: "raw_matcha_powder", name: "29. ผงมัทฉะ (Matcha Powder)", category: "หมวดของสด/วัตถุดิบหลัก", defaultTare: "none" }
+    { id: "raw_milk", name: "25. นมสด (g)", category: "หมวดของสด/วัตถุดิบหลัก", defaultTare: "jug_large" },
+    { id: "raw_condensed_milk", name: "26. นมข้นหวาน (g)", category: "หมวดของสด/วัตถุดิบหลัก", defaultTare: "squeeze_lg" },
+    { id: "raw_evap_milk", name: "27. นมข้นจืด (g)", category: "หมวดของสด/วัตถุดิบหลัก", defaultTare: "squeeze_lg" },
+    { id: "raw_choc_powder", name: "28. ผงช็อกโกแลต (g)", category: "หมวดของสด/วัตถุดิบหลัก", defaultTare: "none" },
+    { id: "raw_matcha_powder", name: "29. ผงมัทฉะ (g)", category: "หมวดของสด/วัตถุดิบหลัก", defaultTare: "none" }
+];
+
+// 2. รายการเมนูสำหรับคำนวณปริมาณการใช้วัตถุดิบตามสูตร
+const RECIPES = [
+    { id: "menu_latte", name: "Iced Latte", ingredients: { raw_milk: 120, syr_simple: 15 } },
+    { id: "menu_mocha", name: "Iced Mocha", ingredients: { base_choc: 40, raw_milk: 100, syr_simple: 10 } },
+    { id: "menu_thai_tea", name: "Iced Thai Tea", ingredients: { base_thai_tea: 90, raw_condensed_milk: 20, raw_evap_milk: 30 } },
+    { id: "menu_green_tea", name: "Iced Green Tea", ingredients: { base_green_tea: 90, raw_condensed_milk: 20, raw_evap_milk: 30 } },
+    { id: "menu_matcha_latte", name: "Matcha Latte", ingredients: { base_matcha: 60, raw_milk: 120, syr_simple: 10 } },
+    { id: "menu_caramel_macchiato", name: "Caramel Macchiato", ingredients: { syr_caramel: 15, base_caramel_sauce: 10, raw_milk: 120 } },
+    { id: "menu_dirty", name: "Dirty Coffee", ingredients: { raw_milk: 90, raw_evap_milk: 30, syr_vanilla: 10 } }
 ];
 
 let storeData = {};
+let salesData = {};
 
 function initData() {
     WEEKLY_ITEMS.forEach(item => {
-        storeData[item.id] = [
-            { tareKey: item.defaultTare, gross: 0 }
-        ];
+        storeData[item.id] = [{ tareKey: item.defaultTare, gross: 0 }];
+    });
+    RECIPES.forEach(r => {
+        salesData[r.id] = 0;
     });
 }
 
 function renderApp() {
+    // Render Stock Cards
     const container = document.getElementById('weekly-items-container');
     container.innerHTML = '';
-
     let currentCategory = "";
 
     WEEKLY_ITEMS.forEach(item => {
@@ -237,13 +303,12 @@ function renderApp() {
             currentCategory = item.category;
             const banner = document.createElement('div');
             banner.className = 'section-banner';
-            banner.innerText = currentCategory;
+            banner.innerHTML = `<span>${currentCategory}</span>`;
             container.appendChild(banner);
         }
 
         const card = document.createElement('div');
         card.className = 'card';
-        card.id = `card-${item.id}`;
         
         let rowsHTML = '';
         const containers = storeData[item.id] || [];
@@ -256,23 +321,14 @@ function renderApp() {
 
             let optionsHTML = '';
             for (let k in TARES) {
-                const selected = (k === c.tareKey) ? 'selected' : '';
-                optionsHTML += `<option value="${k}" ${selected}>${TARES[k].name}</option>`;
+                optionsHTML += `<option value="${k}" ${k === c.tareKey ? 'selected' : ''}>${TARES[k].name}</option>`;
             }
 
             rowsHTML += `
                 <div class="container-row">
-                    <div>
-                        <select onchange="updateTare('${item.id}', ${index}, this.value)">
-                            ${optionsHTML}
-                        </select>
-                    </div>
-                    <div>
-                        <input type="number" placeholder="ชั่งรวม (g)" value="${c.gross || ''}" oninput="updateGross('${item.id}', ${index}, this.value)">
-                    </div>
-                    <div>
-                        ${containers.length > 1 ? `<button class="btn-del" onclick="removeRow('${item.id}',${index})">✕</button>` : `<div style="width:32px;"></div>`}
-                    </div>
+                    <div><select onchange="updateTare('${item.id}', ${index}, this.value)">${optionsHTML}</select></div>
+                    <div><input type="number" placeholder="ชั่งรวม (g)" value="${c.gross || ''}" oninput="updateGross('${item.id}', ${index}, this.value)"></div>
+                    <div>${containers.length > 1 ? `<button class="btn-del" onclick="removeRow('${item.id}',${index})">✕</button>` : `<div style="width:32px;"></div>`}</div>
                 </div>
             `;
         });
@@ -282,24 +338,38 @@ function renderApp() {
                 <div class="card-title">${item.name}</div>
                 <div class="card-summary" id="sum-${item.id}">${totalNet.toFixed(1)} g</div>
             </div>
-            <div id="rows-${item.id}">
-                ${rowsHTML}
-            </div>
+            <div>${rowsHTML}</div>
             <button class="btn-add" onclick="addRow('${item.id}', '${item.defaultTare}')">+ เพิ่มขวด/ภาชนะ</button>
         `;
-
         container.appendChild(card);
     });
+
+    // Render Recipe Sales Inputs
+    const recipeContainer = document.getElementById('recipe-inputs-container');
+    let recipeHTML = '';
+    RECIPES.forEach(r => {
+        recipeHTML += `
+            <div class="recipe-grid">
+                <span style="font-weight:600;">${r.name}</span>
+                <input type="number" placeholder="จำนวนแก้ว" value="${salesData[r.id] || ''}" oninput="updateSales('${r.id}', this.value)">
+            </div>
+        `;
+    });
+    recipeContainer.innerHTML = recipeHTML;
+
+    calculateSummary();
 }
 
 function updateGross(itemId, index, val) {
     storeData[itemId][index].gross = parseFloat(val) || 0;
     recalcItem(itemId);
+    calculateSummary();
 }
 
 function updateTare(itemId, index, tareKey) {
     storeData[itemId][index].tareKey = tareKey;
     recalcItem(itemId);
+    calculateSummary();
 }
 
 function addRow(itemId, defaultTare) {
@@ -314,19 +384,100 @@ function removeRow(itemId, index) {
     }
 }
 
+function updateSales(recipeId, val) {
+    salesData[recipeId] = parseFloat(val) || 0;
+    calculateSummary();
+}
+
 function recalcItem(itemId) {
     const containers = storeData[itemId] || [];
     let totalNet = 0;
     containers.forEach(c => {
         const tareVal = TARES[c.tareKey] ? TARES[c.tareKey].weight : 0;
-        const net = Math.max(0, (parseFloat(c.gross) || 0) - tareVal);
-        totalNet += net;
+        totalNet += Math.max(0, (parseFloat(c.gross) || 0) - tareVal);
     });
-    
     const sumEl = document.getElementById(`sum-${itemId}`);
-    if (sumEl) {
-        sumEl.innerText = `${totalNet.toFixed(1)} g`;
+    if (sumEl) sumEl.innerText = `${totalNet.toFixed(1)} g`;
+}
+
+// ระบบคำนวณสรุปความต้องการวัตถุดิบเทียบกับสต็อกจริง
+function calculateSummary() {
+    let needed = {};
+    WEEKLY_ITEMS.forEach(i => needed[i.id] = 0);
+
+    // คำนวณปริมาณที่ต้องใช้ตามยอดขาย
+    RECIPES.forEach(r => {
+        const cups = salesData[r.id] || 0;
+        if (cups > 0) {
+            for (let ing in r.ingredients) {
+                if (needed[ing] !== undefined) {
+                    needed[ing] += r.ingredients[ing] * cups;
+                }
+            }
+        }
+    });
+
+    const reportEl = document.getElementById('summary-report-list');
+    let reportHTML = '';
+
+    WEEKLY_ITEMS.forEach(item => {
+        // หา Net Stock ปัจจุบัน
+        let currentStock = 0;
+        (storeData[item.id] || []).forEach(c => {
+            const tareVal = TARES[c.tareKey] ? TARES[c.tareKey].weight : 0;
+            currentStock += Math.max(0, (parseFloat(c.gross) || 0) - tareVal);
+        });
+
+        const req = needed[item.id] || 0;
+        const diff = currentStock - req;
+
+        if (req > 0 || currentStock > 0) {
+            const statusClass = diff < 0 ? 'order-needed' : 'order-ok';
+            const statusText = diff < 0 ? `ขาดอีก ${Math.abs(diff).toFixed(0)} g (ต้องสั่งเพิ่ม)` : `พอใช้ (เหลือ ${diff.toFixed(0)} g)`;
+
+            reportHTML += `
+                <div class="summary-item">
+                    <span><strong>${item.name}</strong><br><small style="opacity:0.7">มีอยู่: ${currentStock.toFixed(0)}g | ต้องใช้: ${req.toFixed(0)}g</small></span>
+                    <span class="${statusClass}">${statusText}</span>
+                </div>
+            `;
+        }
+    });
+
+    if (reportHTML === '') {
+        reportHTML = '<div style="text-align:center; opacity:0.6; padding:10px;">ยังไม่มีข้อมูลการคำนวณ (กรอกน้ำหนักหรือยอดขายด้านบน)</div>';
     }
+
+    reportEl.innerHTML = reportHTML;
+}
+
+function copyReport() {
+    let text = "📋 **รายงานสรุปสต็อกและยอดสั่งซื้อรายอาทิตย์**\n----------------------------\n";
+    let hasData = false;
+
+    WEEKLY_ITEMS.forEach(item => {
+        let currentStock = 0;
+        (storeData[item.id] || []).forEach(c => {
+            const tareVal = TARES[c.tareKey] ? TARES[c.tareKey].weight : 0;
+            currentStock += Math.max(0, (parseFloat(c.gross) || 0) - tareVal);
+        });
+
+        if (currentStock > 0) {
+            text += `- ${item.name}: ${currentStock.toFixed(1)} g\n`;
+            hasData = true;
+        }
+    });
+
+    if (!hasData) {
+        alert("ยังไม่มีข้อมูลสต็อกให้คัดลอก กรุณากรอกน้ำหนักวัตถุดิบก่อนครับ");
+        return;
+    }
+
+    navigator.clipboard.writeText(text).then(() => {
+        alert("คัดลอกรายงานสรุปเรียบร้อยแล้ว! สามารถนำไปวางใน LINE ได้ทันที");
+    }).catch(err => {
+        alert("ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง");
+    });
 }
 
 initData();
