@@ -1,796 +1,1094 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee Shop Inventory Calculator</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Sukhumvit / Kanit / Inter style -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Prompt', 'sans-serif'],
-                    },
-                    colors: {
-                        coffee: {
-                            50: '#fdfbf7',
-                            100: '#f7f2e8',
-                            200: '#eee3d0',
-                            300: '#e1cdb0',
-                            400: '#cdab7e',
-                            500: '#ba8c54',
-                            600: '#a37142',
-                            700: '#835637',
-                            800: '#6d4633',
-                            900: '#5a3b2e',
-                            950: '#321e17',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        /* Smooth custom scrolling */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cdab7e;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a37142;
-        }
-        /* Custom number input appearance */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบคำนวณและสรุปคลังวัตถุดิบร้านกาแฟ</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background-color: #f1f5f9;
+    }
+    .badge-sub {
+      background-color: #f3e8ff;
+      color: #6b21a8;
+      border: 1px solid #d8b4fe;
+    }
+    .bg-summary-card {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+  </style>
 </head>
-<body class="bg-stone-100 text-stone-800 font-sans min-h-screen pb-12">
+<body class="pb-24">
 
-    <!-- Header / Navbar -->
-    <header class="bg-gradient-to-r from-coffee-900 via-coffee-800 to-coffee-950 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="p-2.5 bg-coffee-600/30 rounded-xl border border-coffee-400/30">
-                    <i class="fa-solid me-0 fa-calculator text-coffee-300 text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">คำนวณสต็อกวัตถุดิบร้านกาแฟ</h1>
-                    <p class="text-xs text-coffee-200">Barista Preparation & Stock Inventory System</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 flex-wrap">
-                <button onclick="resetAllData()" class="px-3 py-2 bg-rose-700/80 hover:bg-rose-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-all flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-rotate-left"></i> ล้างข้อมูลทั้งหมด
-                </button>
-                <button onclick="copySummaryText()" class="px-3 py-2 bg-coffee-600 hover:bg-coffee-500 text-white text-xs sm:text-sm font-medium rounded-lg transition-all flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-regular fa-copy"></i> คัดลอกสรุป
-                </button>
-                <button onclick="exportCSV()" class="px-3 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs sm:text-sm font-medium rounded-lg transition-all flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-file-csv"></i> ส่งออก CSV
-                </button>
-            </div>
+  <!-- Header -->
+  <header class="bg-indigo-900 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-mug-hot text-amber-400 text-3xl"></i>
+        <div>
+          <h1 class="text-xl md:text-2xl font-bold">ระบบคำนวณและสรุปคลังวัตถุดิบ (Barista Inventory)</h1>
+          <p class="text-xs text-indigo-200">คำนวณวัตถุดิบหักน้ำหนักภาชนะอัตโนมัติ สรุปผลชัดเจน อ่านง่าย</p>
         </div>
-    </header>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="openModalSummary()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded-lg shadow transition duration-200 flex items-center gap-2">
+          <i class="fa-solid fa-file-invoice"></i> สรุปวัตถุดิบ (เฉพาะที่มี)
+        </button>
+        <button onclick="resetAllInputs()" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-2 rounded-lg shadow transition duration-200 flex items-center gap-1 text-sm">
+          <i class="fa-solid fa-rotate-left"></i> รีเซ็ต
+        </button>
+      </div>
+    </div>
+  </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-8">
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-8">
 
-        <!-- Notification Toast -->
-        <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-stone-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center space-x-2 border border-stone-700 text-sm transition-all">
-            <i class="fa-solid fa-circle-check text-emerald-400" id="toastIcon"></i>
-            <span id="toastMsg">แจ้งเตือน</span>
+    <!-- Section 1: BASE PREPARATIONS -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-amber-800 text-white px-6 py-4 flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-flask"></i> 1. หมวดเตรียม Base & สูตรเครื่องดื่ม</h2>
+          <p class="text-xs text-amber-100 mt-0.5">กรอกน้ำหนักรวมภาชนะ ระบบจะหักภาชนะ คำนวณสูตรสกัด และกระจายวัตถุดิบลงตารางให้อัตโนมัติ</p>
         </div>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="baseCardsContainer">
+          <!-- Dynamically injected Base cards -->
+        </div>
+      </div>
+    </section>
 
-        <!-- Section 1: BASE PREPARATION LIST -->
-        <section class="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 sm:p-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-4 border-b border-stone-200 gap-2">
-                <div>
-                    <h2 class="text-lg font-bold text-coffee-900 flex items-center gap-2">
-                        <i class="fa-solid fa-blender text-coffee-600"></i> 1. ตารางเบสเตรียม (PREPARATION BASES)
-                    </h2>
-                    <p class="text-xs text-stone-500">กรอกน้ำหนักรวมภาชนะ ระบบจะลบน้ำหนักภาชนะและคิดสัดส่วนวัตถุดิบเข้าสต็อกให้อัตโนมัติ (สามารถเพิ่มหลายภาชนะได้)</p>
-                </div>
+    <!-- Section 2: SYRUP SECTION -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-indigo-800 text-white px-6 py-4 flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-bottle-droplet"></i> 2. หมวด ไซรัป (Syrups)</h2>
+          <p class="text-xs text-indigo-100 mt-0.5">คำนวณหักน้ำหนักขวด Monin / LongBeach / ขวดเฉพาะทาง</p>
+        </div>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="syrupCardsContainer">
+          <!-- Dynamically injected Syrup cards -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: DIRECT MATERIAL INVENTORY -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-emerald-800 text-white px-6 py-4 flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-boxes-stacked"></i> 3. คลังวัตถุดิบหลัก / กรอกตรง & รวมสุทธิ</h2>
+          <p class="text-xs text-emerald-100 mt-0.5">รวมผลลัพธ์จากข้อ 1, 2 และสามารถกรอกน้ำหนักวัตถุดิบที่นับตรงเพิ่มเติมได้ในช่อง 'กรอกตรง'</p>
+        </div>
+      </div>
+      
+      <div class="p-6 overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[700px]">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 text-xs uppercase border-b border-slate-200">
+              <th class="py-3 px-4 font-bold">ชื่อวัตถุดิบ</th>
+              <th class="py-3 px-4 font-bold">กรอกตรง / ตัวเอง</th>
+              <th class="py-3 px-4 font-bold">คำนวณมาจาก Base/Syrup</th>
+              <th class="py-3 px-4 font-bold">รวมทั้งหมด (g / ml)</th>
+              <th class="py-3 px-4 font-bold">นับจำนวนแพ็คเกจ / ขวด / ถุง</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody" class="divide-y divide-slate-100 text-sm">
+            <!-- Dynamically populated inventory rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 4: BOTTOM SUMMARY (EXCLUDE 0) -->
+    <section class="bg-summary-card text-white rounded-xl shadow-lg p-6 border border-slate-700">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-700 pb-4 mb-4 gap-3">
+        <div>
+          <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+            <i class="fa-solid fa-list-check"></i> สรุปวัตถุดิบที่มีอยู่ทั้งหมด (รายการที่เป็น 0 จะถูกซ่อน)
+          </h2>
+          <p class="text-xs text-slate-300 mt-1">แสดงผลเฉพาะวัตถุดิบที่มีปริมาณมากกว่า 0 เพื่อความง่ายในการตรวจเช็คสต็อก</p>
+        </div>
+        <button onclick="copyActiveSummaryText()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition duration-150">
+          <i class="fa-solid fa-copy"></i> คัดลอกข้อความสรุป
+        </button>
+      </div>
+
+      <div id="bottomSummaryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- Active items injected here -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal for Clean Summary -->
+  <div id="summaryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="bg-indigo-900 text-white px-6 py-4 flex justify-between items-center">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-receipt"></i> สรุปรายการวัตถุดิบ (เฉพาะที่มี)</h3>
+        <button onclick="closeModalSummary()" class="text-indigo-200 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+      <div class="p-6 overflow-y-auto flex-1">
+        <p class="text-xs text-slate-500 mb-3">คัดลอกข้อความนี้เพื่อนำไปส่งในแชทหรือบันทึกสต็อกได้ทันที:</p>
+        <pre id="summaryTextOutput" class="bg-slate-900 text-emerald-400 p-4 rounded-lg font-mono text-sm leading-relaxed whitespace-pre-wrap select-all"></pre>
+      </div>
+      <div class="bg-slate-100 px-6 py-3 flex justify-end gap-2 border-t border-slate-200">
+        <button onclick="copyModalSummaryText()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+          <i class="fa-solid fa-copy"></i> คัดลอก
+        </button>
+        <button onclick="closeModalSummary()" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-semibold px-4 py-2 rounded-lg text-sm">
+          ปิด
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- CONTAINER TARE CONSTANTS ---
+    const CONTAINERS = {
+      none: { label: "ไม่มีภาชนะ (0g)", val: 0 },
+      shaker: { label: "shaker (ไม่รวมฝา) [103.7g]", val: 103.7 },
+      jug_small: { label: "เหยือกเล็ก [121.3g]", val: 121.3 },
+      jug_large: { label: "เหยือกใหญ่ [359g]", val: 359 },
+      squeeze_small: { label: "ขวดบีบ [72g]", val: 72 },
+      squeeze_large: { label: "ขวดบีบใหญ่ [100g]", val: 100 },
+      monin_empty: { label: "ขวด Monin เปล่า [462.3g]", val: 462.3 },
+      monin_pump: { label: "ขวด Monin ปั้ม [493.3g]", val: 493.3 },
+      lb_empty: { label: "ขวด LongBeach เปล่า [0g]", val: 0 },
+      lb_pump: { label: "ขวด LongBeach ปั้ม [0g]", val: 0 },
+      bs_empty: { label: "butter scotch (เปล่า) [125.0g]", val: 125.0 },
+      bs_pump: { label: "butter scotch (ฝาปั้ม) [199.1g]", val: 199.1 },
+      bs_squeeze: { label: "butter scotch (ขวดบีบ) [25.5g]", val: 25.5 }
+    };
+
+    // --- BASE PREPARATIONS CONFIGURATION ---
+    const BASE_CONFIGS = [
+      {
+        id: "cham",
+        name: "Cham",
+        allowedContainers: ['shaker', 'jug_small', 'jug_large', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_small', // 121.3
+        calc: (net) => {
+          // Recipe: Sweet 505g, Evap 369g => Total 874g per batch
+          if (net <= 0) return { condensed_sweet: 0, condensed_evap: 0 };
+          const ratioSweet = 505 / 874;
+          const ratioEvap = 369 / 874;
+          return { condensed_sweet: net * ratioSweet, condensed_evap: net * ratioEvap };
+        },
+        badgeFormatter: (res) => `ข้นหวาน: ${res.condensed_sweet.toFixed(1)}g | ข้นจืด: ${res.condensed_evap.toFixed(1)}g`
+      },
+      {
+        id: "choc",
+        name: "ช็อค (Chocolate)",
+        allowedContainers: ['squeeze_small', 'squeeze_large', 'jug_large', 'shaker', 'jug_small', 'none'],
+        defaultContainer: 'squeeze_small', // 72
+        calc: (net) => {
+          // Recipe: Powder 400g + Water 600g => 1000g yield. Powder = 40% of yield.
+          if (net <= 0) return { choc_powder: 0 };
+          return { choc_powder: net * 0.40 };
+        },
+        badgeFormatter: (res) => `ผงช็อคเหลือ: ${res.choc_powder.toFixed(1)}g`
+      },
+      {
+        id: "matcha",
+        name: "มัจฉะ (Matcha)",
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large', // 359
+        calc: (net) => {
+          // Recipe: Powder 100g + Water 1500g => 1600g yield. Powder = 100/1600 = 0.0625
+          if (net <= 0) return { matcha_powder: 0 };
+          return { matcha_powder: net * (100 / 1600) };
+        },
+        badgeFormatter: (res) => `ผงมัจฉะเหลือ: ${res.matcha_powder.toFixed(1)}g`
+      },
+      {
+        id: "matcha_creme",
+        name: "มัจฉะครีม",
+        allowedContainers: ['jug_small', 'shaker', 'jug_large', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_small', // 121.3
+        calc: (net) => {
+          // Recipe: Milk 200, Toppin 100, Powder 10 => Total 310
+          if (net <= 0) return { meiji: 0, toppin: 0, matcha_powder: 0 };
+          const rMilk = 200 / 310;
+          const rTop = 100 / 310;
+          const rPowder = 10 / 310;
+          return { meiji: net * rMilk, toppin: net * rTop, matcha_powder: net * rPowder };
+        },
+        badgeFormatter: (res) => `นม: ${res.meiji.toFixed(1)}ml | Toppin: ${res.toppin.toFixed(1)}g | มัจฉะ: ${res.matcha_powder.toFixed(1)}g`
+      },
+      {
+        id: "butter_creme",
+        name: "บัตเตอร์ครีม",
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large', // 359
+        calc: (net) => {
+          // Recipe: Espresso 50, Toppin 175, Milk 175 => Total 400
+          if (net <= 0) return { meiji: 0, toppin: 0 };
+          const rTop = 175 / 400;
+          const rMilk = 175 / 400;
+          return { meiji: net * rMilk, toppin: net * rTop };
+        },
+        badgeFormatter: (res) => `นม: ${res.meiji.toFixed(1)}ml | Toppin: ${res.toppin.toFixed(1)}g`
+      },
+      {
+        id: "butterscotch_squeeze",
+        name: "บัตเตอร์ scotch ขวดบีบ",
+        allowedContainers: ['bs_squeeze', 'bs_empty', 'bs_pump', 'none'],
+        defaultContainer: 'bs_squeeze', // 25.5
+        calc: (net) => ({ butterscotch: Math.max(0, net) }),
+        badgeFormatter: (res) => `Butterscotch: ${res.butterscotch.toFixed(1)}g`
+      },
+      {
+        id: "butterscotch_pump",
+        name: "บัตเตอร์ scotch ขวดใหญ่ปั้ม",
+        allowedContainers: ['bs_pump', 'bs_empty', 'bs_squeeze', 'none'],
+        defaultContainer: 'bs_pump', // 199.1
+        calc: (net) => ({ butterscotch: Math.max(0, net) }),
+        badgeFormatter: (res) => `Butterscotch: ${res.butterscotch.toFixed(1)}g`
+      },
+      {
+        id: "strawberry_creme",
+        name: "สตรอว์เบอร์รี่ครีม",
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large', // 359
+        calc: (net) => {
+          // Recipe: Toppin 100, Milk 100, Strawberry 15, Lime 17.5 => Total 232.5
+          if (net <= 0) return { toppin: 0, meiji: 0, strawberry: 0, lemonade_powder: 0 };
+          const rTop = 100 / 232.5;
+          const rMilk = 100 / 232.5;
+          const rStraw = 15 / 232.5;
+          const rLime = 17.5 / 232.5;
+          return { toppin: net * rTop, meiji: net * rMilk, strawberry: net * rStraw, lemonade_powder: net * rLime };
+        },
+        badgeFormatter: (res) => `Toppin: ${res.toppin.toFixed(1)} | นม: ${res.meiji.toFixed(1)} | สตรอว์เบอร์รี่: ${res.strawberry.toFixed(1)} | มะนาว: ${res.lemonade_powder.toFixed(1)}`
+      },
+      {
+        id: "velvet_creme",
+        name: "Velvet creme",
+        allowedContainers: ['jug_small', 'shaker', 'jug_large', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_small', // 121
+        calc: (net) => {
+          // Recipe: Toppin 175, Milk 125, Cheesecake syrup 25 => Total 325
+          if (net <= 0) return { toppin: 0, meiji: 0, cheesecake_syrup: 0 };
+          const rTop = 175 / 325;
+          const rMilk = 125 / 325;
+          const rCheese = 25 / 325;
+          return { toppin: net * rTop, meiji: net * rMilk, cheesecake_syrup: net * rCheese };
+        },
+        badgeFormatter: (res) => `Toppin: ${res.toppin.toFixed(1)} | นม: ${res.meiji.toFixed(1)} | Cheesecake Syrup: ${res.cheesecake_syrup.toFixed(1)}`
+      },
+      {
+        id: "thai_tea_milk",
+        name: "ชาไทยนม (จากชาไทยเบส)",
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large', // 359
+        calc: (net) => {
+          // Recipe: Brewed Thai Tea 1200g + Non-dairy Creamer 160g => Total 1360g
+          // Brewed Thai tea is made from Tea Powder 200g + Water 2400g => 2600g (Ratio powder = 200/2600 = 1/13)
+          if (net <= 0) return { creamer: 0, thai_tea_powder: 0 };
+          const brewedTeaRemaining = net * (1200 / 1360);
+          const creamerRemaining = net * (160 / 1360);
+          const teaPowderRemaining = brewedTeaRemaining * (200 / 2600);
+          return { creamer: creamerRemaining, thai_tea_powder: teaPowderRemaining };
+        },
+        badgeFormatter: (res) => `Creamer: ${res.creamer.toFixed(1)}g | ผงชาไทย: ${res.thai_tea_powder.toFixed(1)}g`
+      },
+      {
+        id: "sugar_syrup",
+        name: "Sugar Syrup",
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large',
+        calc: (net) => {
+          // Sugar 1000g + Water 2000g => 3000g total. Sugar ratio = 1000/3000 = 1/3
+          if (net <= 0) return { sugar: 0 };
+          return { sugar: net * (1 / 3) };
+        },
+        badgeFormatter: (res) => `น้ำตาลทราย: ${res.sugar.toFixed(1)}g`
+      },
+      {
+        id: "lime_base",
+        name: "Limebase",
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large',
+        calc: (net) => {
+          // Lemonade powder 200g + Water 1000g => 1200g total. Powder = 200/1200 = 1/6
+          if (net <= 0) return { lemonade_powder: 0 };
+          return { lemonade_powder: net * (1 / 6) };
+        },
+        badgeFormatter: (res) => `Lemonade Powder: ${res.lemonade_powder.toFixed(1)}g`
+      },
+      {
+        id: "whipping_cream",
+        name: "Whipping Cream",
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large',
+        calc: (net) => {
+          // Toppin 500g + Butterscotch 40g => Total 540g
+          if (net <= 0) return { toppin: 0, butterscotch: 0 };
+          const rTop = 500 / 540;
+          const rBS = 40 / 540;
+          return { toppin: net * rTop, butterscotch: net * rBS };
+        },
+        badgeFormatter: (res) => `Toppin: ${res.toppin.toFixed(1)}g | Butterscotch: ${res.butterscotch.toFixed(1)}g`
+      }
+    ];
+
+    // --- SYRUP CONFIGURATION ---
+    const SYRUP_CONFIGS = [
+      { id: "vanilla", name: "Vanilla", key: "vanilla_syrup", fixedTare: null },
+      { id: "hazelnut", name: "Hazelnut", key: "hazelnut_syrup", fixedTare: null },
+      { id: "salted_caramel", name: "Salted Caramel", key: "salted_caramel_syrup", fixedTare: null },
+      { id: "young_coconut", name: "Young Coconut", key: "young_coconut_syrup", fixedTare: null },
+      { id: "cheesecake", name: "Cheesecake", key: "cheesecake_syrup", fixedTare: null },
+      { id: "brown_butter", name: "Brownbutter", key: "brownbutter_syrup", fixedTare: null },
+      { id: "calamansi", name: "Calamansi", key: "calamansi_syrup", fixedTare: 102.1 },
+      { id: "tangerine", name: "Tangerine", key: "tangerine_syrup", fixedTare: 102.1 },
+      { id: "grape", name: "Grape", key: "grape_syrup", fixedTare: 89.1 },
+      {
+        id: "strawberry",
+        name: "Strawberry Syrup",
+        key: "strawberry",
+        allowedContainers: ['monin_empty', 'monin_pump', 'none'],
+        customTareOptions: [
+          { label: "ขวดเปล่า [107.1g]", val: 107.1 },
+          { label: "ขวดปั้ม [174g]", val: 174 }
+        ]
+      }
+    ];
+
+    // --- MASTER INVENTORY DEFINITION ---
+    const INVENTORY_ITEMS = [
+      {
+        id: "oat_milk",
+        name: "Oat Milk (1 ML)",
+        directTare: 42.1,
+        unit: "ml",
+        pkgCalc: (val) => val > 0 ? `${(val / 1000).toFixed(2)} กล่อง (1000ml)` : "-"
+      },
+      {
+        id: "butterscotch",
+        name: "Butterscotch",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "condensed_sweet",
+        name: "นมข้นหวาน",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => {
+          if (val <= 0) return "-";
+          if (val >= 505) {
+            const count = Math.floor(val / 505);
+            const rem = (val % 505).toFixed(1);
+            return `${count} ขวด/กระป๋อง กับอีก ${rem}g`;
+          }
+          return `${val.toFixed(1)}g (ยังไม่ถึง 505g)`;
+        }
+      },
+      {
+        id: "condensed_evap",
+        name: "นมข้นจืด",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => {
+          if (val <= 0) return "-";
+          if (val >= 369) {
+            const count = Math.floor(val / 369);
+            const rem = (val % 369).toFixed(1);
+            return `${count} ขวด/กระป๋อง กับอีก ${rem}g`;
+          }
+          return `${val.toFixed(1)}g (ยังไม่ถึง 369g)`;
+        }
+      },
+      {
+        id: "meiji",
+        name: "MeijiRey (นมสด)",
+        directTare: 75.0,
+        unit: "ml",
+        pkgCalc: (val) => {
+          if (val <= 0) return "-";
+          if (val >= 2000) {
+            const count = Math.floor(val / 2000);
+            const rem = (val % 2000).toFixed(1);
+            return `${count} แกลลอน กับอีก ${rem}ml`;
+          }
+          return `${val.toFixed(1)}ml (ยังไม่ถึง 2000ml)`;
+        }
+      },
+      {
+        id: "choc_powder",
+        name: "Chocolate Powder (ผงช็อค)",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => {
+          if (val <= 0) return "-";
+          if (val >= 400) {
+            const count = Math.floor(val / 400);
+            const rem = (val % 400).toFixed(1);
+            return `${count} ถุง กับอีก ${rem}g`;
+          }
+          return `${val.toFixed(1)}g (ยังไม่ถึง 400g)`;
+        }
+      },
+      {
+        id: "vanilla_syrup",
+        name: "Vanilla Syrup",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "hazelnut_syrup",
+        name: "Hazelnut Syrup",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "salted_caramel_syrup",
+        name: "Salted Caramel Syrup",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "creamer",
+        name: "Non dairy Creamer (ครีมเทียม)",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "lemonade_powder",
+        name: "Lemonade Powder (ผงมะนาว)",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "thai_tea_powder",
+        name: "ผงชาไทย",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "soda",
+        name: "Soda (โซดา)",
+        directTare: 230.0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "calamansi_syrup",
+        name: "Calamansi Syrup",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "tangerine_syrup",
+        name: "Tangerine Syrup",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "sugar",
+        name: "Sugar (น้ำตาล)",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => {
+          if (val <= 0) return "-";
+          if (val >= 1000) {
+            const count = Math.floor(val / 1000);
+            const rem = (val % 1000).toFixed(1);
+            return `${count} ถุง กับอีก ${rem}g`;
+          }
+          return `${val.toFixed(1)}g (ยังไม่ถึง 1000g)`;
+        }
+      },
+      {
+        id: "grape_syrup",
+        name: "Grape Syrup",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "cheesecake_syrup",
+        name: "Cheesecake Syrup",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "matcha_powder",
+        name: "Matcha Powder (ผงมัจฉะ)",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => {
+          if (val <= 0) return "-";
+          if (val >= 100) {
+            const count = Math.floor(val / 100);
+            const rem = (val % 100).toFixed(1);
+            return `${count} ถุง กับอีก ${rem}g`;
+          }
+          return `${val.toFixed(1)}g (ยังไม่ถึง 100g)`;
+        }
+      },
+      {
+        id: "smoothie_powder",
+        name: "Smoothie Powder",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "cocoa_sauce",
+        name: "Cocoa Sauce",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "brownbutter_syrup",
+        name: "Brownbutter Syrup",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "young_coconut_syrup",
+        name: "Young Coconut Syrup",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "nobo_coconut_milk",
+        name: "Nobo Coconut Milk",
+        directTare: 47.0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "if_coconut_water",
+        name: "If Coconut Water",
+        directTare: 25.5,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "strawberry",
+        name: "Strawberry Syrup / Puree",
+        directTare: 0,
+        unit: "g",
+        pkgCalc: (val) => "-"
+      },
+      {
+        id: "toppin",
+        name: "Toppin",
+        directTare: 55.6,
+        unit: "g",
+        pkgCalc: (val) => {
+          if (val <= 0) return "-";
+          if (val >= 907) {
+            const count = Math.floor(val / 907);
+            const rem = (val % 907).toFixed(1);
+            return `${count} ขวด กับอีก ${rem}g`;
+          }
+          return `${val.toFixed(1)}g (ยังไม่ถึง 907g)`;
+        }
+      }
+    ];
+
+    // --- DYNAMIC ROW STORE ---
+    // Structure: { [baseOrSyrupId]: [ { id, tareKey, grossWeight }, ... ] }
+    const dynamicRows = {};
+
+    // Direct Inventory Inputs Store: { [itemId]: number }
+    const directInventoryInputs = {};
+
+    // --- INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      initBaseCards();
+      initSyrupCards();
+      initInventoryTable();
+      calculateAll();
+    });
+
+    // Initialize Base Cards HTML
+    function initBaseCards() {
+      const container = document.getElementById('baseCardsContainer');
+      container.innerHTML = '';
+
+      BASE_CONFIGS.forEach(cfg => {
+        dynamicRows[cfg.id] = [{ id: Date.now() + Math.random(), tareKey: cfg.defaultContainer, grossWeight: 0 }];
+
+        const card = document.createElement('div');
+        card.className = "bg-slate-50 rounded-lg p-4 border border-slate-200 shadow-sm flex flex-col justify-between";
+        card.id = `card-base-${cfg.id}`;
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-bold text-slate-800 text-sm md:text-base">${cfg.name}</h3>
+              <button onclick="addBaseRow('${cfg.id}')" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-2 py-1 rounded transition flex items-center gap-1">
+                <i class="fa-solid fa-plus"></i> เพิ่มภาชนะ
+              </button>
             </div>
-
-            <!-- Dynamic Base Grid -->
-            <div id="baseListContainer" class="space-y-4">
-                <!-- Javascript will render dynamic sections here -->
+            <div id="rows-base-${cfg.id}" class="space-y-2 mb-3">
+              <!-- Row items injected here -->
             </div>
-        </section>
-
-        <!-- Section 2: SYRUP LIST -->
-        <section class="bg-white rounded-2xl shadow-sm border border-stone-200 p-4 sm:p-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-4 border-b border-stone-200 gap-2">
-                <div>
-                    <h2 class="text-lg font-bold text-coffee-900 flex items-center gap-2">
-                        <i class="fa-solid fa-bottle-droplet text-coffee-600"></i> 2. ตารางไซรัป (SYRUP SECTION)
-                    </h2>
-                    <p class="text-xs text-stone-500">คำนวณไซรัปตามยี่ห้อและประเภทหัวปั้ม/ขวด</p>
-                </div>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-200">
+            <div id="badge-base-${cfg.id}" class="text-xs font-semibold px-2.5 py-1.5 rounded badge-sub min-h-[28px] flex items-center">
+              เหลือ: 0g
             </div>
+          </div>
+        `;
+        container.appendChild(card);
+        renderBaseRows(cfg.id);
+      });
+    }
 
-            <!-- Syrup Container -->
-            <div id="syrupListContainer" class="space-y-4">
-                <!-- Javascript will render syrup sections here -->
+    // Render Rows for a Base Card
+    function renderBaseRows(baseId) {
+      const rowsContainer = document.getElementById(`rows-base-${baseId}`);
+      if (!rowsContainer) return;
+
+      const cfg = BASE_CONFIGS.find(c => c.id === baseId);
+      const rows = dynamicRows[baseId] || [];
+
+      rowsContainer.innerHTML = rows.map((row, idx) => {
+        const containerOptions = cfg.allowedContainers.map(cKey => {
+          const cObj = CONTAINERS[cKey];
+          return `<option value="${cKey}" ${row.tareKey === cKey ? 'selected' : ''}>${cObj.label}</option>`;
+        }).join('');
+
+        return `
+          <div class="flex items-center gap-2">
+            <select onchange="updateBaseRow('${baseId}', ${idx}, 'tareKey', this.value)" class="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:ring-1 focus:ring-amber-500 flex-1">
+              ${containerOptions}
+            </select>
+            <input type="number" value="${row.grossWeight || ''}" placeholder="0" min="0" oninput="updateBaseRow('${baseId}', ${idx}, 'grossWeight', this.value)"
+              class="w-20 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-amber-500 bg-white" />
+            <span class="text-xs text-slate-500">g</span>
+            ${rows.length > 1 ? `
+              <button onclick="removeBaseRow('${baseId}',${idx})" class="text-slate-400 hover:text-red-500 text-sm px-1">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            ` : '<span class="w-4"></span>'}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addBaseRow(baseId) {
+      const cfg = BASE_CONFIGS.find(c => c.id === baseId);
+      dynamicRows[baseId].push({ id: Date.now() + Math.random(), tareKey: cfg.defaultContainer, grossWeight: 0 });
+      renderBaseRows(baseId);
+      calculateAll();
+    }
+
+    function removeBaseRow(baseId, idx) {
+      dynamicRows[baseId].splice(idx, 1);
+      renderBaseRows(baseId);
+      calculateAll();
+    }
+
+    function updateBaseRow(baseId, idx, field, value) {
+      if (field === 'grossWeight') {
+        dynamicRows[baseId][idx].grossWeight = parseFloat(value) || 0;
+      } else {
+        dynamicRows[baseId][idx][field] = value;
+      }
+      calculateAll();
+    }
+
+    // Initialize Syrup Cards HTML
+    function initSyrupCards() {
+      const container = document.getElementById('syrupCardsContainer');
+      container.innerHTML = '';
+
+      SYRUP_CONFIGS.forEach(cfg => {
+        dynamicRows[cfg.id] = [{ id: Date.now() + Math.random(), tareKey: cfg.allowedContainers ? cfg.allowedContainers[0] : 'monin_empty', grossWeight: 0 }];
+
+        const card = document.createElement('div');
+        card.className = "bg-slate-50 rounded-lg p-4 border border-slate-200 shadow-sm flex flex-col justify-between";
+        card.id = `card-syrup-${cfg.id}`;
+
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-bold text-slate-800 text-sm md:text-base">${cfg.name}</h3>
+              ${cfg.fixedTare === null ? `
+                <button onclick="addSyrupRow('${cfg.id}')" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded transition flex items-center gap-1">
+                  <i class="fa-solid fa-plus"></i> เพิ่มขวด
+                </button>
+              ` : ''}
             </div>
-        </section>
-
-        <!-- Section 3: DIRECT STOCK & SUMMARY -->
-        <section class="bg-white rounded-2xl shadow-lg border border-coffee-200 p-4 sm:p-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 mb-4 border-b border-stone-200 gap-2">
-                <div>
-                    <h2 class="text-xl font-bold text-coffee-950 flex items-center gap-2">
-                        <i class="fa-solid fa-boxes-stacked text-coffee-600"></i> 3. ตารางสรุปสต็อกวัตถุดิบรวม (MATERIAL SUMMARY)
-                    </h2>
-                    <p class="text-xs text-stone-500">แสดงผลรวมวัตถุดิบทั้งหมดที่คำนวณจากเบส ไซรัป และช่องทางตรง (Direct Input) พร้อมคำนวณบรรจุภัณฑ์</p>
-                </div>
-                <div class="text-right bg-coffee-50 px-3 py-1.5 rounded-lg border border-coffee-200">
-                    <span class="text-xs font-semibold text-coffee-800">คำนวณเรียลไทม์ (Auto Calculated)</span>
-                </div>
+            <div id="rows-syrup-${cfg.id}" class="space-y-2 mb-3">
+              <!-- Rows injected here -->
             </div>
-
-            <!-- Summary Table / Grid -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs sm:text-sm border-collapse">
-                    <thead>
-                        <tr class="bg-stone-100 text-stone-700 border-b border-stone-300">
-                            <th class="p-3 rounded-tl-lg font-semibold">รายการวัตถุดิบ</th>
-                            <th class="p-3 font-semibold min-w-[180px]">กรอกตรงเพิ่มเติม (Direct Input / Tare Deduc.)</th>
-                            <th class="p-3 text-right font-semibold">รวมสุทธิ (g / mL)</th>
-                            <th class="p-3 rounded-tr-lg font-semibold min-w-[220px]">คำนวณจำนวนบรรจุภัณฑ์ / ถุง / ขวด</th>
-                        </tr>
-                    </thead>
-                    <tbody id="summaryTableBody" class="divide-y divide-stone-200">
-                        <!-- Dynamic Material Rows generated via JS -->
-                    </tbody>
-                </table>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-200">
+            <div id="badge-syrup-${cfg.id}" class="text-xs font-semibold px-2.5 py-1.5 rounded badge-sub min-h-[28px] flex items-center">
+              เนื้อไซรัปเหลือ: 0g
             </div>
-        </section>
-    </main>
+          </div>
+        `;
+        container.appendChild(card);
+        renderSyrupRows(cfg.id);
+      });
+    }
 
-    <!-- Footer -->
-    <footer class="max-w-7xl mx-auto px-4 text-center mt-12 text-xs text-stone-400">
-        Coffee Shop Inventory Calculator &bull; ออกแบบเพื่อการเช็คสต็อกวัตถุดิบและเบสเครื่องดื่มอย่างแม่นยำ
-    </footer>
+    function renderSyrupRows(syrupId) {
+      const rowsContainer = document.getElementById(`rows-syrup-${syrupId}`);
+      if (!rowsContainer) return;
 
-    <!-- Logic Script -->
-    <script>
-        // --- DATA STRUCTURES & CONFIG --- //
+      const cfg = SYRUP_CONFIGS.find(s => s.id === syrupId);
+      const rows = dynamicRows[syrupId] || [];
 
-        // Container Tare Definitions (Grams)
-        const BASE_CONTAINERS = [
-            { id: 'none', name: 'ไม่คิดน้ำหนักภาชนะ (0g)', tare: 0 },
-            { id: 'shaker', name: 'Shaker (ไม่รวมฝา) [103.7g]', tare: 103.7 },
-            { id: 'jug_s', name: 'เหยือกเล็ก [121.3g]', tare: 121.3 },
-            { id: 'jug_l', name: 'เหยือกใหญ่ [359g]', tare: 359 },
-            { id: 'squeeze_s', name: 'ขวดบีบ [72g]', tare: 72 },
-            { id: 'squeeze_l', name: 'ขวดบีบใหญ่ [100g]', tare: 100 },
-        ];
+      if (cfg.fixedTare !== null) {
+        // Fixed tare syrup
+        const row = rows[0] || { grossWeight: 0 };
+        rowsContainer.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-600 flex-1">ภาชนะตายตัว (-${cfg.fixedTare}g)</span>
+            <input type="number" value="${row.grossWeight || ''}" placeholder="0" min="0" oninput="updateSyrupRow('${syrupId}', 0, 'grossWeight', this.value)"
+              class="w-24 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-indigo-500 bg-white" />
+            <span class="text-xs text-slate-500">g</span>
+          </div>
+        `;
+        return;
+      }
 
-        const BUTTERSCOTCH_CONTAINERS = [
-            { id: 'none', name: 'ไม่คิดน้ำหนักภาชนะ (0g)', tare: 0 },
-            { id: 'bs_empty', name: 'Butterscotch (เปล่า) [125.0g]', tare: 125.0 },
-            { id: 'bs_pump', name: 'Butterscotch (ฝาปั้ม) [199.1g]', tare: 199.1 },
-            { id: 'bs_squeeze', name: 'Butterscotch (ขวดบีบ) [25.5g]', tare: 25.5 },
-        ];
+      // Variable tare options
+      let containerOptionsHTML = '';
+      if (cfg.customTareOptions) {
+        containerOptionsHTML = cfg.customTareOptions.map((opt, i) => `<option value="custom_${i}">${opt.label}</option>`).join('');
+      } else {
+        containerOptionsHTML = `
+          <option value="monin_empty">${CONTAINERS.monin_empty.label}</option>
+          <option value="monin_pump">${CONTAINERS.monin_pump.label}</option>
+          <option value="lb_empty">${CONTAINERS.lb_empty.label}</option>
+          <option value="lb_pump">${CONTAINERS.lb_pump.label}</option>
+          <option value="none">${CONTAINERS.none.label}</option>
+        `;
+      }
 
-        const SYRUP_CONTAINERS = [
-            { id: 'none', name: 'ไม่คิดน้ำหนักภาชนะ (0g)', tare: 0 },
-            { id: 'monin_empty', name: 'ขวด Monin เปล่า [462.3g]', tare: 462.3 },
-            { id: 'monin_pump', name: 'ขวด Monin ปั้ม [493.3g]', tare: 493.3 },
-            { id: 'lb_empty', name: 'ขวด LongBeach เปล่า [0g]', tare: 0 },
-            { id: 'lb_pump', name: 'ขวด LongBeach ปั้ม [0g]', tare: 0 },
-        ];
+      rowsContainer.innerHTML = rows.map((row, idx) => {
+        return `
+          <div class="flex items-center gap-2">
+            <select onchange="updateSyrupRow('${syrupId}', ${idx}, 'tareKey', this.value)" class="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:ring-1 focus:ring-indigo-500 flex-1">
+              ${containerOptionsHTML}
+            </select>
+            <input type="number" value="${row.grossWeight || ''}" placeholder="0" min="0" oninput="updateSyrupRow('${syrupId}', ${idx}, 'grossWeight', this.value)"
+              class="w-20 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-indigo-500 bg-white" />
+            <span class="text-xs text-slate-500">g</span>
+            ${rows.length > 1 ? `
+              <button onclick="removeSyrupRow('${syrupId}',${idx})" class="text-slate-400 hover:text-red-500 text-sm px-1">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            ` : '<span class="w-4"></span>'}
+          </div>
+        `;
+      }).join('');
 
-        const STRAWBERRY_SYRUP_CONTAINERS = [
-            { id: 'none', name: 'ไม่คิดน้ำหนักภาชนะ (0g)', tare: 0 },
-            { id: 'sb_empty', name: 'ขวดเปล่า [107.1g]', tare: 107.1 },
-            { id: 'sb_pump', name: 'ขวดปั้ม [174g]', tare: 174.0 },
-        ];
+      // Set initial select values
+      rows.forEach((row, idx) => {
+        const selects = rowsContainer.querySelectorAll('select');
+        if (selects[idx] && row.tareKey) {
+          selects[idx].value = row.tareKey;
+        }
+      });
+    }
 
-        // Base Items Specification
-        const BASE_ITEMS = [
-            { id: 'cham', name: 'Cham', desc: 'ข้นหวาน 505g : ข้นจืด 369g' },
-            { id: 'choc', name: 'ช็อค (Chocolate Base)', desc: 'ผงช็อค 400g + น้ำ 600g' },
-            { id: 'matcha', name: 'มัจฉะ (Matcha Base)', desc: 'ผงมัจฉะ 100g + น้ำ 1500g' },
-            { id: 'matcha_cream', name: 'มัจฉะครีม (Matcha Cream)', desc: 'นม 200g + Toppin 100g + ผงมัจฉะ 10g' },
-            { id: 'butter_cream', name: 'บัตเตอร์ครีม (Butter Cream)', desc: 'Espresso 50g + Toppin 175g + นม 175g' },
-            { id: 'bs_squeeze_item', name: 'บัตเตอร์ scotch ขวดบีบ', desc: 'คิดน้ำหนัก Butterscotch', isBS: true },
-            { id: 'bs_pump_item', name: 'บัตเตอร์ scotch ขวดใหญ่ปั้ม', desc: 'คิดน้ำหนัก Butterscotch', isBS: true },
-            { id: 'strawberry_cream', name: 'สตรอว์เบอร์รี่ครีม', desc: 'Toppin 100g + นม 100g + Strawberry 15g + มะนาว 17.5g' },
-            { id: 'velvet_creme', name: 'Velvet creme', desc: 'Toppin 175g + นม 125g + Cheesecake syrup 25g' },
-            { id: 'thai_tea_base', name: 'ชาไทยเบส', desc: 'ชาไทย 200g + น้ำ 2400g' },
-            { id: 'thai_tea_milk', name: 'ชาไทยนม', desc: 'ชาไทยกรอง 1200g + Creamer 160g' },
-            { id: 'sugar_syrup', name: 'Sugar syrup', desc: 'น้ำตาล 1000g + น้ำ 2000g' },
-            { id: 'lime_base', name: 'Limebase', desc: 'Lemonade powder 200g + น้ำ 1000g' },
-            { id: 'whipping_cream', name: 'Whipping cream', desc: 'Toppin 500g + Butterscotch 40g' },
-        ];
+    function addSyrupRow(syrupId) {
+      dynamicRows[syrupId].push({ id: Date.now() + Math.random(), tareKey: 'monin_empty', grossWeight: 0 });
+      renderSyrupRows(syrupId);
+      calculateAll();
+    }
 
-        // Syrup Items Specification
-        const SYRUP_ITEMS = [
-            { id: 'vanilla', name: 'Vanilla', type: 'standard' },
-            { id: 'hazelnut', name: 'Hazelnut', type: 'standard' },
-            { id: 'salted_caramel', name: 'Salted Caramel', type: 'standard' },
-            { id: 'young_coconut', name: 'Young Coconut', type: 'standard' },
-            { id: 'cheesecake', name: 'Cheesecake', type: 'standard' },
-            { id: 'brownbutter', name: 'Brownbutter', type: 'standard' },
-            // Fixed Containers
-            { id: 'calamansi', name: 'Calamansi', type: 'fixed', tare: 102.1 },
-            { id: 'tangerine', name: 'Tangerine', type: 'fixed', tare: 102.1 },
-            { id: 'grape', name: 'Grape', type: 'fixed', tare: 89.1 },
-            { id: 'strawberry', name: 'Strawberry', type: 'strawberry_select' },
-        ];
+    function removeSyrupRow(syrupId, idx) {
+      dynamicRows[syrupId].splice(idx, 1);
+      renderSyrupRows(syrupId);
+      calculateAll();
+    }
 
-        // Summary Materials Master List
-        const MATERIALS = [
-            { id: 'oat_milk', name: '1. Oat milk 1ML', directTare: 42.1, pkgSize: null, pkgUnit: '' },
-            { id: 'butterscotch', name: '2. Butterscotch', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'condensed_sweet', name: '3. นมข้นหวาน', directTare: 0, pkgSize: 505, pkgUnit: 'ขวด/กระป๋อง' },
-            { id: 'condensed_evap', name: '3. นมข้นจืด', directTare: 0, pkgSize: 369, pkgUnit: 'ขวด/กระป๋อง' },
-            { id: 'meiji_milk', name: '4. MeijiRey (นม)', directTare: 75, pkgSize: 2000, pkgUnit: 'แกลลอน' },
-            { id: 'choc_powder', name: '5. Chocolate powder', directTare: 0, pkgSize: 400, pkgUnit: 'ถุง' },
-            { id: 'vanilla_syrup', name: '6. Vanilla Syrup', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'hazelnut_syrup', name: '7. Hazelnut Syrup', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'salted_caramel_syrup', name: '8. Salted Caramel', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'non_dairy_creamer', name: '9. Non dairy creamer', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'lemonade_powder', name: '10. Lemonade powder', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'thai_tea_powder', name: '11. ผงชาไทย', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'soda', name: '12. Soda', directTare: 230, pkgSize: null, pkgUnit: '' },
-            { id: 'calamansi_mat', name: '13. Calamansi', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'tangerine_mat', name: '14. Tangerine', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'sugar', name: '15. Sugar', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'grape_mat', name: '16. Grape', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'cheesecake_syrup', name: '17. Cheesecake syrup', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'matcha_powder', name: '18. Matcha Powder', directTare: 0, pkgSize: 100, pkgUnit: 'ถุง' },
-            { id: 'smoothie_powder', name: '19. Smoothie powder', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'cocoa_sauce', name: '20. Cocoa sauce', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'brownbutter_syrup', name: '21. Brownbutter syrup', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'young_coconut_syrup', name: '22. Young Coconut syrup', directTare: 0, pkgSize: null, pkgUnit: '' },
-            { id: 'nobo_coconut_milk', name: '23. Nobo Coconut milk', directTare: 47, pkgSize: null, pkgUnit: '' },
-            { id: 'if_coconut_water', name: '24. If Coconut water', directTare: 25.5, pkgSize: null, pkgUnit: '' },
-            { id: 'toppin', name: '25. Toppin', directTare: 55.6, pkgSize: 907, pkgUnit: 'ขวด' },
-        ];
+    function updateSyrupRow(syrupId, idx, field, value) {
+      if (field === 'grossWeight') {
+        dynamicRows[syrupId][idx].grossWeight = parseFloat(value) || 0;
+      } else {
+        dynamicRows[syrupId][idx][field] = value;
+      }
+      calculateAll();
+    }
 
-        // --- APP STATE --- //
-        // State for Dynamic Rows in Base & Syrup
-        // Base state: { [baseId]: [ { weight: number, tare: number, containerId: string } ] }
-        let baseState = {};
-        // Syrup state: { [syrupId]: [ { weight: number, tare: number, containerId: string } ] }
-        let syrupState = {};
-        // Direct Material Inputs: { [matId]: number }
-        let directInputs = {};
+    // Initialize Master Inventory Table HTML
+    function initInventoryTable() {
+      const tbody = document.getElementById('inventoryTableBody');
+      tbody.innerHTML = '';
 
-        // --- INITIALIZATION --- //
-        function initApp() {
-            // Initialize Base State
-            BASE_ITEMS.forEach(item => {
-                baseState[item.id] = [{ weight: 0, containerId: 'none', tare: 0 }];
-            });
+      INVENTORY_ITEMS.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-medium text-slate-800">${item.name}</td>
+          <td class="py-3 px-4">
+            <div class="flex items-center gap-1">
+              <input type="number" id="input-direct-${item.id}" value="" placeholder="0" min="0" oninput="updateDirectInput('${item.id}', this.value)"
+                class="w-24 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-emerald-500 bg-white" />
+              <span class="text-xs text-slate-400">${item.unit}</span>
+              ${item.directTare > 0 ? `<span class="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">-${item.directTare}</span>` : ''}
+            </div>
+          </td>
+          <td class="py-3 px-4 font-mono text-xs text-slate-600" id="calc-from-base-${item.id}">0.0 ${item.unit}</td>
+          <td class="py-3 px-4 font-mono font-bold text-emerald-700" id="calc-total-${item.id}">0.0 ${item.unit}</td>
+          <td class="py-3 px-4 text-xs font-semibold text-slate-700" id="calc-pkg-${item.id}">-</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
-            // Initialize Syrup State
-            SYRUP_ITEMS.forEach(item => {
-                if (item.type === 'standard') {
-                    syrupState[item.id] = [{ weight: 0, containerId: 'none', tare: 0 }];
-                } else if (item.type === 'fixed') {
-                    syrupState[item.id] = [{ weight: 0, containerId: 'fixed', tare: item.tare }];
-                } else if (item.type === 'strawberry_select') {
-                    syrupState[item.id] = [{ weight: 0, containerId: 'none', tare: 0 }];
-                }
-            });
+    function updateDirectInput(itemId, value) {
+      directInventoryInputs[itemId] = parseFloat(value) || 0;
+      calculateAll();
+    }
 
-            // Initialize Direct Inputs
-            MATERIALS.forEach(mat => {
-                directInputs[mat.id] = 0;
-            });
+    // --- MAIN CALCULATION ENGINE ---
+    function calculateAll() {
+      // 1. Reset calculated sums for inventory items
+      const calculatedSums = {};
+      INVENTORY_ITEMS.forEach(i => calculatedSums[i.id] = 0);
 
-            renderBaseUI();
-            renderSyrupUI();
-            renderSummaryUI();
-            calculateAndUpdate();
+      // 2. Process Base Cards
+      BASE_CONFIGS.forEach(cfg => {
+        const rows = dynamicRows[cfg.id] || [];
+        let totalNetInBaseCard = 0;
+
+        rows.forEach(r => {
+          const tare = CONTAINERS[r.tareKey] ? CONTAINERS[r.tareKey].val : 0;
+          const net = Math.max(0, r.grossWeight - tare);
+          totalNetInBaseCard += net;
+        });
+
+        // Run Recipe Calc
+        const recipeResult = cfg.calc(totalNetInBaseCard);
+
+        // Update badge
+        const badge = document.getElementById(`badge-base-${cfg.id}`);
+        if (badge) {
+          badge.innerText = cfg.badgeFormatter(recipeResult);
         }
 
-        // --- RENDER BASE SECTION --- //
-        function renderBaseUI() {
-            const container = document.getElementById('baseListContainer');
-            container.innerHTML = '';
+        // Add recipe outcomes to master calculatedSums
+        Object.keys(recipeResult).forEach(matKey => {
+          if (calculatedSums[matKey] !== undefined) {
+            calculatedSums[matKey] += recipeResult[matKey];
+          }
+        });
+      });
 
-            BASE_ITEMS.forEach(item => {
-                const isBS = !!item.isBS;
-                const containerOptions = isBS ? BUTTERSCOTCH_CONTAINERS : BASE_CONTAINERS;
+      // 3. Process Syrup Cards
+      SYRUP_CONFIGS.forEach(cfg => {
+        const rows = dynamicRows[cfg.id] || [];
+        let totalNetSyrup = 0;
 
-                const itemCard = document.createElement('div');
-                itemCard.className = 'bg-stone-50 rounded-xl p-3 sm:p-4 border border-stone-200 hover:border-coffee-300 transition-colors';
+        rows.forEach(r => {
+          let tare = 0;
+          if (cfg.fixedTare !== null) {
+            tare = cfg.fixedTare;
+          } else if (cfg.customTareOptions && r.tareKey.startsWith('custom_')) {
+            const idx = parseInt(r.tareKey.split('_')[1]);
+            tare = cfg.customTareOptions[idx] ? cfg.customTareOptions[idx].val : 0;
+          } else if (CONTAINERS[r.tareKey]) {
+            tare = CONTAINERS[r.tareKey].val;
+          }
+          const net = Math.max(0, r.grossWeight - tare);
+          totalNetSyrup += net;
+        });
 
-                let rowsHtml = baseState[item.id].map((entry, idx) => `
-                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 mt-2">
-                        <div class="w-full sm:w-1/2">
-                            <select onchange="updateBaseEntry('${item.id}', ${idx}, 'containerId', this.value)" 
-                                class="w-full bg-white border border-stone-300 rounded-lg text-xs sm:text-sm p-2 focus:ring-1 focus:ring-coffee-500 focus:outline-none">
-                                ${containerOptions.map(c => `
-                                    <option value="${c.id}" ${entry.containerId === c.id ? 'selected' : ''}>${c.name}</option>
-                                `).join('')}
-                            </select>
-                        </div>
-                        <div class="w-2/3 sm:w-1/3 flex items-center bg-white border border-stone-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-coffee-500">
-                            <input type="number" step="any" min="0" value="${entry.weight || ''}" placeholder="น้ำหนักรวม (g)"
-                                oninput="updateBaseEntry('${item.id}', ${idx}, 'weight', this.value)"
-                                class="w-full text-xs sm:text-sm p-2 focus:outline-none" />
-                            <span class="text-xs text-stone-400 px-2">g</span>
-                        </div>
-                        <div class="w-1/3 sm:w-auto flex justify-end">
-                            ${baseState[item.id].length > 1 ? `
-                                <button onclick="removeBaseEntry('${item.id}', ${idx})" class="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            ` : `<div class="w-8"></div>`}
-                        </div>
-                    </div>
-                `).join('');
-
-                itemCard.innerHTML = `
-                    <div class="flex justify-between items-center pb-1 border-b border-stone-200">
-                        <div>
-                            <span class="font-bold text-sm text-stone-800">${item.name}</span>
-                            <span class="text-xs text-coffee-600 block sm:inline sm:ml-2">(${item.desc})</span>
-                        </div>
-                        <button onclick="addBaseEntry('${item.id}')" class="text-xs bg-coffee-100 hover:bg-coffee-200 text-coffee-800 font-medium px-2.5 py-1 rounded-md transition-colors flex items-center gap-1">
-                            <i class="fa-solid fa-plus"></i> เพิ่มภาชนะ
-                        </button>
-                    </div>
-                    <div class="space-y-1">
-                        ${rowsHtml}
-                    </div>
-                `;
-
-                container.appendChild(itemCard);
-            });
+        // Update Syrup Badge
+        const badge = document.getElementById(`badge-syrup-${cfg.id}`);
+        if (badge) {
+          badge.innerText = `เนื้อเหลือสุทธิ: ${totalNetSyrup.toFixed(1)}g`;
         }
 
-        // --- RENDER SYRUP SECTION --- //
-        function renderSyrupUI() {
-            const container = document.getElementById('syrupListContainer');
-            container.innerHTML = '';
-
-            SYRUP_ITEMS.forEach(item => {
-                const itemCard = document.createElement('div');
-                itemCard.className = 'bg-stone-50 rounded-xl p-3 sm:p-4 border border-stone-200 hover:border-coffee-300 transition-colors';
-
-                let rowsHtml = '';
-
-                if (item.type === 'standard') {
-                    rowsHtml = syrupState[item.id].map((entry, idx) => `
-                        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 mt-2">
-                            <div class="w-full sm:w-1/2">
-                                <select onchange="updateSyrupEntry('${item.id}', ${idx}, 'containerId', this.value)" 
-                                    class="w-full bg-white border border-stone-300 rounded-lg text-xs sm:text-sm p-2 focus:ring-1 focus:ring-coffee-500 focus:outline-none">
-                                    ${SYRUP_CONTAINERS.map(c => `
-                                        <option value="${c.id}" ${entry.containerId === c.id ? 'selected' : ''}>${c.name}</option>
-                                    `).join('')}
-                                </select>
-                            </div>
-                            <div class="w-2/3 sm:w-1/3 flex items-center bg-white border border-stone-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-coffee-500">
-                                <input type="number" step="any" min="0" value="${entry.weight || ''}" placeholder="น้ำหนักรวม (g)"
-                                    oninput="updateSyrupEntry('${item.id}', ${idx}, 'weight', this.value)"
-                                    class="w-full text-xs sm:text-sm p-2 focus:outline-none" />
-                                <span class="text-xs text-stone-400 px-2">g</span>
-                            </div>
-                            <div class="w-1/3 sm:w-auto flex justify-end">
-                                ${syrupState[item.id].length > 1 ? `
-                                    <button onclick="removeSyrupEntry('${item.id}', ${idx})" class="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                ` : `<div class="w-8"></div>`}
-                            </div>
-                        </div>
-                    `).join('');
-                } else if (item.type === 'fixed') {
-                    const entry = syrupState[item.id][0];
-                    rowsHtml = `
-                        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 mt-2">
-                            <div class="w-full sm:w-1/2 text-xs text-stone-600 bg-stone-200/60 p-2 rounded-lg">
-                                หักภาชนะตายตัว: ${item.tare} g
-                            </div>
-                            <div class="w-full sm:w-1/2 flex items-center bg-white border border-stone-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-coffee-500">
-                                <input type="number" step="any" min="0" value="${entry.weight || ''}" placeholder="น้ำหนักรวม (g)"
-                                    oninput="updateSyrupEntry('${item.id}', 0, 'weight', this.value)"
-                                    class="w-full text-xs sm:text-sm p-2 focus:outline-none" />
-                                <span class="text-xs text-stone-400 px-2">g</span>
-                            </div>
-                        </div>
-                    `;
-                } else if (item.type === 'strawberry_select') {
-                    rowsHtml = syrupState[item.id].map((entry, idx) => `
-                        <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 mt-2">
-                            <div class="w-full sm:w-1/2">
-                                <select onchange="updateSyrupEntry('${item.id}', ${idx}, 'containerId', this.value)" 
-                                    class="w-full bg-white border border-stone-300 rounded-lg text-xs sm:text-sm p-2 focus:ring-1 focus:ring-coffee-500 focus:outline-none">
-                                    ${STRAWBERRY_SYRUP_CONTAINERS.map(c => `
-                                        <option value="${c.id}" ${entry.containerId === c.id ? 'selected' : ''}>${c.name}</option>
-                                    `).join('')}
-                                </select>
-                            </div>
-                            <div class="w-2/3 sm:w-1/3 flex items-center bg-white border border-stone-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-coffee-500">
-                                <input type="number" step="any" min="0" value="${entry.weight || ''}" placeholder="น้ำหนักรวม (g)"
-                                    oninput="updateSyrupEntry('${item.id}', ${idx}, 'weight', this.value)"
-                                    class="w-full text-xs sm:text-sm p-2 focus:outline-none" />
-                                <span class="text-xs text-stone-400 px-2">g</span>
-                            </div>
-                            <div class="w-1/3 sm:w-auto flex justify-end">
-                                ${syrupState[item.id].length > 1 ? `
-                                    <button onclick="removeSyrupEntry('${item.id}', ${idx})" class="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                ` : `<div class="w-8"></div>`}
-                            </div>
-                        </div>
-                    `).join('');
-                }
-
-                itemCard.innerHTML = `
-                    <div class="flex justify-between items-center pb-1 border-b border-stone-200">
-                        <span class="font-bold text-sm text-stone-800">${item.name}</span>
-                        ${item.type !== 'fixed' ? `
-                            <button onclick="addSyrupEntry('${item.id}')" class="text-xs bg-coffee-100 hover:bg-coffee-200 text-coffee-800 font-medium px-2.5 py-1 rounded-md transition-colors flex items-center gap-1">
-                                <i class="fa-solid fa-plus"></i> เพิ่มขวด
-                            </button>
-                        ` : ''}
-                    </div>
-                    <div class="space-y-1">
-                        ${rowsHtml}
-                    </div>
-                `;
-
-                container.appendChild(itemCard);
-            });
+        // Add to calculatedSums
+        if (calculatedSums[cfg.key] !== undefined) {
+          calculatedSums[cfg.key] += totalNetSyrup;
         }
+      });
 
-        // --- RENDER SUMMARY TABLE UI --- //
-        function renderSummaryUI() {
-            const tbody = document.getElementById('summaryTableBody');
-            tbody.innerHTML = '';
+      // 4. Update Master Inventory Table & Active Summary List
+      const activeItemsForSummary = [];
 
-            MATERIALS.forEach(mat => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-stone-50/80 transition-colors';
+      INVENTORY_ITEMS.forEach(item => {
+        const directGross = directInventoryInputs[item.id] || 0;
+        const directNet = directGross > 0 ? Math.max(0, directGross - item.directTare) : 0;
+        const fromBase = calculatedSums[item.id] || 0;
+        const totalNet = directNet + fromBase;
 
-                const directInputHtml = `
-                    <div class="flex items-center space-x-1.5">
-                        <input type="number" step="any" min="0" value="${directInputs[mat.id] || ''}" placeholder="0"
-                            oninput="updateDirectInput('${mat.id}', this.value)"
-                            class="w-24 bg-white border border-stone-300 rounded-md p-1.5 text-xs text-right focus:ring-1 focus:ring-coffee-500 focus:outline-none" />
-                        <span class="text-xs text-stone-500">g</span>
-                        ${mat.directTare > 0 ? `<span class="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 font-mono">-${mat.directTare}g</span>` : ''}
-                    </div>
-                `;
+        // UI updates in table
+        const fromBaseTd = document.getElementById(`calc-from-base-${item.id}`);
+        const totalTd = document.getElementById(`calc-total-${item.id}`);
+        const pkgTd = document.getElementById(`calc-pkg-${item.id}`);
 
-                tr.innerHTML = `
-                    <td class="p-3 font-medium text-stone-800">${mat.name}</td>
-                    <td class="p-3">${directInputHtml}</td>
-                    <td class="p-3 text-right font-semibold text-coffee-900 font-mono" id="sum-net-${mat.id}">0.0 g</td>
-                    <td class="p-3 font-mono text-xs text-stone-700" id="sum-pkg-${mat.id}">-</td>
-                `;
+        if (fromBaseTd) fromBaseTd.innerText = `${fromBase.toFixed(1)} ${item.unit}`;
+        if (totalTd) totalTd.innerText = `${totalNet.toFixed(1)} ${item.unit}`;
 
-                tbody.appendChild(tr);
-            });
+        const pkgText = item.pkgCalc(totalNet);
+        if (pkgTd) pkgTd.innerText = pkgText;
+
+        // Collect for bottom active summary if > 0
+        if (totalNet > 0) {
+          activeItemsForSummary.push({
+            name: item.name,
+            total: totalNet.toFixed(1),
+            unit: item.unit,
+            pkg: pkgText
+          });
         }
+      });
 
-        // --- STATE MANAGEMENT FUNCTIONS --- //
+      // 5. Render Bottom Summary Cards
+      renderBottomSummary(activeItemsForSummary);
+    }
 
-        // BASE State Dynamic Actions
-        function addBaseEntry(itemId) {
-            const isBS = BASE_ITEMS.find(i => i.id === itemId)?.isBS;
-            baseState[itemId].push({ weight: 0, containerId: 'none', tare: 0 });
-            renderBaseUI();
-            calculateAndUpdate();
+    function renderBottomSummary(activeItems) {
+      const container = document.getElementById('bottomSummaryGrid');
+      if (!container) return;
+
+      if (activeItems.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-8 text-center text-slate-400 italic bg-slate-800/50 rounded-lg border border-slate-700/50">
+            <i class="fa-solid fa-circle-info text-xl mb-1 block"></i>
+            ยังไม่มีวัตถุดิบที่คุณกรอกหรือคำนวณได้ในขณะนี้ (กรอกตัวเลขด้านบนเพื่อแสดงผลสรุป)
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = activeItems.map(item => `
+        <div class="bg-slate-800/80 rounded-lg p-3.5 border border-slate-700 flex flex-col justify-between hover:border-amber-500/50 transition">
+          <div class="flex justify-between items-start mb-1">
+            <span class="font-bold text-slate-100 text-sm">${item.name}</span>
+            <span class="text-xs font-mono bg-amber-400/10 text-amber-300 font-bold px-2 py-0.5 rounded border border-amber-400/20">
+              ${item.total} ${item.unit}
+            </span>
+          </div>
+          ${item.pkg !== '-' ? `
+            <div class="text-xs text-indigo-300 mt-1 flex items-center gap-1 font-medium">
+              <i class="fa-solid fa-box-archive text-[10px]"></i> ${item.pkg}
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    // --- MODAL & SUMMARY TEXT COPIER ---
+    function generateSummaryText() {
+      let text = "📋 === สรุปรายการวัตถุดิบที่มีอยู่ ===\n\n";
+      let count = 0;
+
+      INVENTORY_ITEMS.forEach(item => {
+        const directGross = directInventoryInputs[item.id] || 0;
+        const directNet = directGross > 0 ? Math.max(0, directGross - item.directTare) : 0;
+        const fromBase = (dynamicRows ? getBaseSumForItem(item.id) : 0);
+        const totalNet = directNet + fromBase;
+
+        if (totalNet > 0) {
+          count++;
+          const pkg = item.pkgCalc(totalNet);
+          text += `${count}. ${item.name}: ${totalNet.toFixed(1)} ${item.unit}`;
+          if (pkg !== '-') {
+            text += `  (${pkg})`;
+          }
+          text += "\n";
         }
+      });
 
-        function removeBaseEntry(itemId, idx) {
-            if (baseState[itemId].length > 1) {
-                baseState[itemId].splice(idx, 1);
-                renderBaseUI();
-                calculateAndUpdate();
-            }
+      if (count === 0) {
+        text += "ไม่มีรายการวัตถุดิบที่มีปริมาณมากกว่า 0";
+      }
+
+      return text;
+    }
+
+    function getBaseSumForItem(itemId) {
+      let sum = 0;
+      BASE_CONFIGS.forEach(cfg => {
+        const rows = dynamicRows[cfg.id] || [];
+        let totalNet = 0;
+        rows.forEach(r => {
+          const tare = CONTAINERS[r.tareKey] ? CONTAINERS[r.tareKey].val : 0;
+          totalNet += Math.max(0, r.grossWeight - tare);
+        });
+        const res = cfg.calc(totalNet);
+        if (res[itemId]) sum += res[itemId];
+      });
+
+      SYRUP_CONFIGS.forEach(cfg => {
+        if (cfg.key === itemId) {
+          const rows = dynamicRows[cfg.id] || [];
+          rows.forEach(r => {
+            let tare = 0;
+            if (cfg.fixedTare !== null) tare = cfg.fixedTare;
+            else if (cfg.customTareOptions && r.tareKey.startsWith('custom_')) {
+              const idx = parseInt(r.tareKey.split('_')[1]);
+              tare = cfg.customTareOptions[idx] ? cfg.customTareOptions[idx].val : 0;
+            } else if (CONTAINERS[r.tareKey]) tare = CONTAINERS[r.tareKey].val;
+
+            sum += Math.max(0, r.grossWeight - tare);
+          });
         }
+      });
+      return sum;
+    }
 
-        function updateBaseEntry(itemId, idx, key, value) {
-            const isBS = BASE_ITEMS.find(i => i.id === itemId)?.isBS;
-            const containerOptions = isBS ? BUTTERSCOTCH_CONTAINERS : BASE_CONTAINERS;
+    function openModalSummary() {
+      const text = generateSummaryText();
+      document.getElementById('summaryTextOutput').innerText = text;
+      document.getElementById('summaryModal').classList.remove('hidden');
+    }
 
-            if (key === 'weight') {
-                baseState[itemId][idx].weight = parseFloat(value) || 0;
-            } else if (key === 'containerId') {
-                baseState[itemId][idx].containerId = value;
-                const c = containerOptions.find(opt => opt.id === value);
-                baseState[itemId][idx].tare = c ? c.tare : 0;
-            }
-            calculateAndUpdate();
-        }
+    function closeModalSummary() {
+      document.getElementById('summaryModal').classList.add('hidden');
+    }
 
-        // SYRUP State Dynamic Actions
-        function addSyrupEntry(itemId) {
-            syrupState[itemId].push({ weight: 0, containerId: 'none', tare: 0 });
-            renderSyrupUI();
-            calculateAndUpdate();
-        }
+    function copyModalSummaryText() {
+      const text = document.getElementById('summaryTextOutput').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("คัดลอกสรุปรายการวัตถุดิบเรียบร้อยแล้ว!");
+      });
+    }
 
-        function removeSyrupEntry(itemId, idx) {
-            if (syrupState[itemId].length > 1) {
-                syrupState[itemId].splice(idx, 1);
-                renderSyrupUI();
-                calculateAndUpdate();
-            }
-        }
+    function copyActiveSummaryText() {
+      const text = generateSummaryText();
+      navigator.clipboard.writeText(text).then(() => {
+        alert("คัดลอกสรุปรายการวัตถุดิบเรียบร้อยแล้ว!");
+      });
+    }
 
-        function updateSyrupEntry(itemId, idx, key, value) {
-            const itemDef = SYRUP_ITEMS.find(i => i.id === itemId);
-            if (key === 'weight') {
-                syrupState[itemId][idx].weight = parseFloat(value) || 0;
-            } else if (key === 'containerId') {
-                syrupState[itemId][idx].containerId = value;
-                let cList = SYRUP_CONTAINERS;
-                if (itemDef.type === 'strawberry_select') {
-                    cList = STRAWBERRY_SYRUP_CONTAINERS;
-                }
-                const c = cList.find(opt => opt.id === value);
-                syrupState[itemId][idx].tare = c ? c.tare : 0;
-            }
-            calculateAndUpdate();
-        }
-
-        // Direct Input State
-        function updateDirectInput(matId, val) {
-            directInputs[matId] = parseFloat(val) || 0;
-            calculateAndUpdate();
-        }
-
-        // Helper: Calculate net positive weight from entries
-        function getNetSum(entries) {
-            if (!entries || !entries.length) return 0;
-            return entries.reduce((acc, curr) => {
-                const net = Math.max(0, (curr.weight || 0) - (curr.tare || 0));
-                return acc + net;
-            }, 0);
-        }
-
-        // --- CALCULATION CORE --- //
-        function calculateAndUpdate() {
-            // Material Accumulator object
-            let totals = {};
-            MATERIALS.forEach(m => totals[m.id] = 0);
-
-            // 1. PROCESS BASE PREPARATIONS
-            const chamNet = getNetSum(baseState['cham']);
-            if (chamNet > 0) {
-                totals['condensed_sweet'] += chamNet * (505 / 874);
-                totals['condensed_evap'] += chamNet * (369 / 874);
-            }
-
-            const chocNet = getNetSum(baseState['choc']);
-            if (chocNet > 0) {
-                // Formula: Choc powder 400, Water 600 -> total 1000 => powder ratio = 0.4
-                totals['choc_powder'] += chocNet * 0.4;
-            }
-
-            const matchaNet = getNetSum(baseState['matcha']);
-            if (matchaNet > 0) {
-                // Formula: Matcha 100, Water 1500 -> total 1600 => powder ratio = 100/1600 = 1/16
-                totals['matcha_powder'] += matchaNet * (100 / 1600);
-            }
-
-            const matchaCreamNet = getNetSum(baseState['matcha_cream']);
-            if (matchaCreamNet > 0) {
-                // Formula: Milk 200, Toppin 100, Matcha 10 -> total 310
-                totals['matcha_powder'] += matchaCreamNet * (10 / 310);
-                totals['toppin'] += matchaCreamNet * (100 / 310);
-                totals['meiji_milk'] += matchaCreamNet * (200 / 310);
-            }
-
-            const butterCreamNet = getNetSum(baseState['butter_cream']);
-            if (butterCreamNet > 0) {
-                // Formula: Espresso 50, Toppin 175, Milk 175 -> total 400
-                totals['toppin'] += butterCreamNet * (175 / 400);
-                totals['meiji_milk'] += butterCreamNet * (175 / 400);
-            }
-
-            const bsSqueezeNet = getNetSum(baseState['bs_squeeze_item']);
-            totals['butterscotch'] += bsSqueezeNet;
-
-            const bsPumpNet = getNetSum(baseState['bs_pump_item']);
-            totals['butterscotch'] += bsPumpNet;
-
-            const strawberryCreamNet = getNetSum(baseState['strawberry_cream']);
-            if (strawberryCreamNet > 0) {
-                // Formula: Toppin 100, Milk 100, Strawberry 15, Lemonade 17.5 -> total 232.5
-                totals['toppin'] += strawberryCreamNet * (100 / 232.5);
-                totals['meiji_milk'] += strawberryCreamNet * (100 / 232.5);
-                totals['tangerine_mat'] += 0; // fallback if needed, strawberry syrup mapping below
-                totals['lemonade_powder'] += strawberryCreamNet * (17.5 / 232.5);
-            }
-
-            const velvetCremeNet = getNetSum(baseState['velvet_creme']);
-            if (velvetCremeNet > 0) {
-                // Formula: Toppin 175, Milk 125, Cheesecake syrup 25 -> total 325
-                totals['toppin'] += velvetCremeNet * (175 / 325);
-                totals['meiji_milk'] += velvetCremeNet * (125 / 325);
-                totals['cheesecake_syrup'] += velvetCremeNet * (25 / 325);
-            }
-
-            const thaiTeaBaseNet = getNetSum(baseState['thai_tea_base']);
-            if (thaiTeaBaseNet > 0) {
-                // Formula: Thai Tea Powder 200, Water 2400 -> total 2600 => powder ratio = 200/2600
-                totals['thai_tea_powder'] += thaiTeaBaseNet * (200 / 2600);
-            }
-
-            const thaiTeaMilkNet = getNetSum(baseState['thai_tea_milk']);
-            if (thaiTeaMilkNet > 0) {
-                // Formula: Filtered Thai Tea Water 1200, Creamer 160 -> total 1360
-                // Creamer portion:
-                totals['non_dairy_creamer'] += thaiTeaMilkNet * (160 / 1360);
-                // Thai Tea Water portion converted back to Thai Tea Powder ratio (200/2600):
-                const teaWaterPart = thaiTeaMilkNet * (1200 / 1360);
-                totals['thai_tea_powder'] += teaWaterPart * (200 / 2600);
-            }
-
-            const sugarSyrupNet = getNetSum(baseState['sugar_syrup']);
-            if (sugarSyrupNet > 0) {
-                // Formula: Sugar 1000, Water 2000 -> total 3000 => sugar ratio = 1000/3000 = 1/3
-                totals['sugar'] += sugarSyrupNet * (1 / 3);
-            }
-
-            const limeBaseNet = getNetSum(baseState['lime_base']);
-            if (limeBaseNet > 0) {
-                // Formula: Lemonade powder 200, Water 1000 -> total 1200 => powder ratio = 200/1200 = 1/6
-                totals['lemonade_powder'] += limeBaseNet * (1 / 6);
-            }
-
-            const whippingCreamNet = getNetSum(baseState['whipping_cream']);
-            if (whippingCreamNet > 0) {
-                // Formula: Toppin 500, Butterscotch 40 -> total 540
-                totals['toppin'] += whippingCreamNet * (500 / 540);
-                totals['butterscotch'] += whippingCreamNet * (40 / 540);
-            }
-
-            // 2. PROCESS SYRUP SECTION
-            totals['vanilla_syrup'] += getNetSum(syrupState['vanilla']);
-            totals['hazelnut_syrup'] += getNetSum(syrupState['hazelnut']);
-            totals['salted_caramel_syrup'] += getNetSum(syrupState['salted_caramel']);
-            totals['young_coconut_syrup'] += getNetSum(syrupState['young_coconut']);
-            totals['cheesecake_syrup'] += getNetSum(syrupState['cheesecake']);
-            totals['brownbutter_syrup'] += getNetSum(syrupState['brownbutter']);
-            totals['calamansi_mat'] += getNetSum(syrupState['calamansi']);
-            totals['tangerine_mat'] += getNetSum(syrupState['tangerine']);
-            totals['grape_mat'] += getNetSum(syrupState['grape']);
-
-            // 3. PROCESS DIRECT INPUTS WITH SPECIFIC TARE DEDUCTIONS
-            MATERIALS.forEach(mat => {
-                const rawVal = directInputs[mat.id] || 0;
-                if (rawVal > 0) {
-                    const netDirect = Math.max(0, rawVal - mat.directTare);
-                    totals[mat.id] += netDirect;
-                }
-            });
-
-            // 4. UPDATE SUMMARY TABLE DOM & PACKAGE COMPUTATION
-            MATERIALS.forEach(mat => {
-                const totalGrams = totals[mat.id] || 0;
-
-                // Update Net Weight cell
-                const netEl = document.getElementById(`sum-net-${mat.id}`);
-                if (netEl) {
-                    netEl.textContent = `${totalGrams.toLocaleString('th-TH', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} g`;
-                }
-
-                // Update Package Computation cell
-                const pkgEl = document.getElementById(`sum-pkg-${mat.id}`);
-                if (pkgEl) {
-                    if (mat.pkgSize && mat.pkgSize > 0) {
-                        const count = Math.floor(totalGrams / mat.pkgSize);
-                        const remainder = totalGrams % mat.pkgSize;
-                        if (totalGrams > 0) {
-                            pkgEl.innerHTML = `<span class="font-bold text-coffee-800">${count}</span> ${mat.pkgUnit} <span class="text-stone-500">(เศษ ${remainder.toFixed(1)} g)</span>`;
-                        } else {
-                            pkgEl.textContent = `0 ${mat.pkgUnit}`;
-                        }
-                    } else {
-                        pkgEl.textContent = '-';
-                    }
-                }
-            });
-        }
-
-        // --- GLOBAL ACTIONS & UTILITIES --- //
-
-        function resetAllData() {
-            if (confirm('คุณต้องการล้างข้อมูลคำนวณทั้งหมดเป็น 0 หรือไม่?')) {
-                initApp();
-                showToast('ล้างข้อมูลเรียบร้อยแล้ว');
-            }
-        }
-
-        function copySummaryText() {
-            let text = "=== สรุปสต็อกวัตถุดิบ (Material Inventory Summary) ===\n\n";
-            MATERIALS.forEach(mat => {
-                const netEl = document.getElementById(`sum-net-${mat.id}`);
-                const pkgEl = document.getElementById(`sum-pkg-${mat.id}`);
-                const netVal = netEl ? netEl.textContent : '0.0 g';
-                const pkgVal = pkgEl ? pkgEl.textContent : '-';
-                
-                text += `${mat.name}: ${netVal}`;
-                if (pkgVal !== '-') {
-                    text += `  [ ${pkgVal} ]`;
-                }
-                text += "\n";
-            });
-
-            // Copy to clipboard fallback
-            const tempInput = document.createElement("textarea");
-            tempInput.value = text;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand("copy");
-            document.body.removeChild(tempInput);
-
-            showToast('คัดลอกสรุปรายการลง Clipboard เรียบร้อยแล้ว!');
-        }
-
-        function exportCSV() {
-            let csvContent = "\uFEFF"; // UTF-8 BOM
-            csvContent += "รายการวัตถุดิบ,ปริมาณสุทธิ (g/mL),การคำนวณบรรจุภัณฑ์\n";
-
-            MATERIALS.forEach(mat => {
-                const netEl = document.getElementById(`sum-net-${mat.id}`);
-                const pkgEl = document.getElementById(`sum-pkg-${mat.id}`);
-                const netVal = netEl ? netEl.textContent.replace(' g', '').replace(',', '') : '0';
-                const pkgVal = pkgEl ? pkgEl.textContent.replace(/,/g, '') : '-';
-
-                csvContent += `"${mat.name}","${netVal}","${pkgVal}"\n`;
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `Coffee_Inventory_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            showToast('ส่งออกไฟล์ CSV เรียบร้อยแล้ว!');
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toastMsg');
-            toastMsg.textContent = msg;
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-        }
-
-        // Start App on Window Load
-        window.onload = function() {
-            initApp();
-        };
-    </script>
+    function resetAllInputs() {
+      if (confirm("คุณต้องการรีเซ็ตค่าทั้งหมดเป็น 0 ใช่หรือไม่?")) {
+        initBaseCards();
+        initSyrupCards();
+        Object.keys(directInventoryInputs).forEach(k => directInventoryInputs[k] = 0);
+        initInventoryTable();
+        calculateAll();
+      }
+    }
+  </script>
 </body>
 </html>
