@@ -1,3 +1,5 @@
+นี่คือโค้ด HTML ฉบับปรับปรุงใหม่ล่าสุด ที่แก้ไขระบบ "ชั่งน้ำหนักหลังใช้งานเพื่อหักลบกับค่าเดิม" ให้ทำงานได้อย่างถูกต้องแม่นยำตามที่คุณต้องการครับ
+เมื่อคุณกรอกค่าน้ำหนักตั้งต้น (เช่น 1866) แล้วกด "+ชั่งใหม่หลังใช้" จากนั้นกรอกน้ำหนักที่ชั่งได้ใหม่ (เช่น 1555) ระบบจะนำค่าใหม่ไปคำนวณหักลบกับภาชนะและอัปเดตปริมาณสุทธิที่เหลือให้ทันทีครับ
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -33,7 +35,7 @@
         <i class="fa-solid fa-mug-hot text-amber-400 text-3xl"></i>
         <div>
           <h1 class="text-xl md:text-2xl font-bold">ระบบคำนวณและสรุปคลังวัตถุดิบ (Barista Inventory)</h1>
-          <p class="text-xs text-indigo-200">คำนวณวัตถุดิบหักน้ำหนักภาชนะอัตโนมัติ สรุปผลสั้นกระชับ อ่านง่าย</p>
+          <p class="text-xs text-indigo-200">ระบบชั่งน้ำหนักอัปเดตสต็อกหลังใช้งาน หักลบแม่นยำ พร้อมสรุปผลกระชับ</p>
         </div>
       </div>
       <div class="flex gap-2">
@@ -54,7 +56,7 @@
       <div class="bg-amber-800 text-white px-6 py-4 flex justify-between items-center">
         <div>
           <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-flask"></i> 1. หมวดเตรียม Base & สูตรเครื่องดื่ม</h2>
-          <p class="text-xs text-amber-100 mt-0.5">กรอกน้ำหนักรวมภาชนะ หรือกดปุ่ม '+1 สูตรเต็ม' ได้ทันที</p>
+          <p class="text-xs text-amber-100 mt-0.5">กรอกน้ำหนักรวม หรือกด '+1 สูตรเต็ม' หรือกด '+ชั่งใหม่หลังใช้' เพื่อใส่ค่าน้ำหนักใหม่</p>
         </div>
       </div>
       <div class="p-6">
@@ -171,7 +173,7 @@
       {
         id: "cham",
         name: "Cham",
-        fullBatchYield: 874, // Sweet 505g + Evap 369g
+        fullBatchYield: 874,
         allowedContainers: ['shaker', 'jug_small', 'jug_large', 'squeeze_small', 'squeeze_large', 'none'],
         defaultContainer: 'jug_small',
         calc: (net) => {
@@ -185,7 +187,7 @@
       {
         id: "choc",
         name: "ช็อค (Chocolate)",
-        fullBatchYield: 1000, // Powder 400g + Water 600g
+        fullBatchYield: 1000,
         allowedContainers: ['squeeze_small', 'squeeze_large', 'jug_large', 'shaker', 'jug_small', 'none'],
         defaultContainer: 'squeeze_small',
         calc: (net) => {
@@ -197,7 +199,7 @@
       {
         id: "matcha",
         name: "มัจฉะ (Matcha)",
-        fullBatchYield: 1600, // Powder 100g + Water 1500g
+        fullBatchYield: 1600,
         allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
         defaultContainer: 'jug_large',
         calc: (net) => {
@@ -209,7 +211,7 @@
       {
         id: "matcha_creme",
         name: "มัจฉะครีม",
-        fullBatchYield: 310, // Milk 200, Toppin 100, Powder 10
+        fullBatchYield: 310,
         allowedContainers: ['jug_small', 'shaker', 'jug_large', 'squeeze_small', 'squeeze_large', 'none'],
         defaultContainer: 'jug_small',
         calc: (net) => {
@@ -224,7 +226,7 @@
       {
         id: "butter_creme",
         name: "บัตเตอร์ครีม",
-        fullBatchYield: 400, // Espresso 50, Toppin 175, Milk 175
+        fullBatchYield: 400,
         allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
         defaultContainer: 'jug_large',
         calc: (net) => {
@@ -256,7 +258,7 @@
       {
         id: "strawberry_creme",
         name: "สตรอว์เบอร์รี่ครีม",
-        fullBatchYield: 232.5, // Toppin 100, Milk 100, Strawberry 15, Lime 17.5
+        fullBatchYield: 232.5,
         allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
         defaultContainer: 'jug_large',
         calc: (net) => {
@@ -272,7 +274,7 @@
       {
         id: "velvet_creme",
         name: "Velvet creme",
-        fullBatchYield: 325, // Toppin 175, Milk 125, Cheesecake syrup 25
+        fullBatchYield: 325,
         allowedContainers: ['jug_small', 'shaker', 'jug_large', 'squeeze_small', 'squeeze_large', 'none'],
         defaultContainer: 'jug_small',
         calc: (net) => {
@@ -287,7 +289,7 @@
       {
         id: "thai_tea_milk",
         name: "ชาไทยนม (จากชาไทยเบส)",
-        fullBatchYield: 1360, // Tea 1200 + Creamer 160
+        fullBatchYield: 1360,
         allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
         defaultContainer: 'jug_large',
         calc: (net) => {
@@ -302,7 +304,7 @@
       {
         id: "sugar_syrup",
         name: "Sugar Syrup",
-        fullBatchYield: 3000, // Sugar 1000 + Water 2000
+        fullBatchYield: 3000,
         allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
         defaultContainer: 'jug_large',
         calc: (net) => {
@@ -314,7 +316,7 @@
       {
         id: "lime_base",
         name: "Limebase",
-        fullBatchYield: 1200, // Lemonade powder 200 + Water 1000
+        fullBatchYield: 1200,
         allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
         defaultContainer: 'jug_large',
         calc: (net) => {
@@ -326,7 +328,7 @@
       {
         id: "whipping_cream",
         name: "Whipping Cream",
-        fullBatchYield: 540, // Toppin 500 + Butterscotch 40
+        fullBatchYield: 540,
         allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
         defaultContainer: 'jug_large',
         calc: (net) => {
@@ -400,7 +402,7 @@
       container.innerHTML = '';
 
       BASE_CONFIGS.forEach(cfg => {
-        dynamicRows[cfg.id] = [{ id: Date.now() + Math.random(), tareKey: cfg.defaultContainer, grossWeight: 0 }];
+        dynamicRows[cfg.id] = [{ id: Date.now() + Math.random(), tareKey: cfg.defaultContainer, grossWeight: 0, isReWeighed: false, initialGross: 0, usedWeight: 0 }];
 
         const card = document.createElement('div');
         card.className = "bg-slate-50 rounded-lg p-4 border border-slate-200 shadow-sm flex flex-col justify-between";
@@ -444,35 +446,70 @@
           return `<option value="${cKey}" ${row.tareKey === cKey ? 'selected' : ''}>${cObj.label}</option>`;
         }).join('');
 
+        const displayWeight = row.isReWeighed ? (row.initialGross || '') : (row.grossWeight || '');
+
         return `
-          <div class="flex items-center gap-2">
-            <select onchange="updateBaseRow('${baseId}', ${idx}, 'tareKey', this.value)" class="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:ring-1 focus:ring-amber-500 flex-1">
-              ${containerOptions}
-            </select>
-            <input type="number" value="${row.grossWeight || ''}" placeholder="0" min="0" oninput="updateBaseRow('${baseId}', ${idx}, 'grossWeight', this.value)"
-              class="w-20 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-amber-500 bg-white" />
-            <span class="text-xs text-slate-500">g</span>
-            ${rows.length > 1 ? `
-              <button onclick="removeBaseRow('${baseId}',${idx})" class="text-slate-400 hover:text-red-500 text-sm px-1">
-                <i class="fa-solid fa-xmark"></i>
+          <div class="flex flex-col gap-1 p-2 bg-white rounded border border-slate-200 shadow-xs">
+            <div class="flex items-center gap-2">
+              <select onchange="updateBaseRow('${baseId}', ${idx}, 'tareKey', this.value)" class="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:ring-1 focus:ring-amber-500 flex-1">
+                ${containerOptions}
+              </select>
+              <input type="number" value="${displayWeight}" placeholder="${row.isReWeighed ? 'ค่าน้ำหนักเดิม' : '0'}" min="0" 
+                oninput="updateBaseRow('${baseId}', ${idx}, '${row.isReWeighed ? 'initialGross' : 'grossWeight'}', this.value)"
+                class="w-20 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-amber-500 bg-white" />
+              <span class="text-xs text-slate-500">g</span>
+              ${rows.length > 1 ? `
+                <button onclick="removeBaseRow('${baseId}',${idx})" class="text-slate-400 hover:text-red-500 text-sm px-1">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              ` : '<span class="w-4"></span>'}
+            </div>
+
+            <!-- Mode Switcher & Re-weigh Sub Input (หักลบกับค่าปัจจุบัน) -->
+            <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
+              <button onclick="toggleReWeighMode('${baseId}', ${idx})" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+                <i class="fa-solid ${row.isReWeighed ? 'fa-square-check text-emerald-600' : 'fa-scale-unbalanced'}"></i>
+                ${row.isReWeighed ? 'โหมด: ชั่งใหม่หลังใช้' : '+ชั่งใหม่หลังใช้'}
               </button>
-            ` : '<span class="w-4"></span>'}
+              
+              ${row.isReWeighed ? `
+                <div class="flex items-center gap-1">
+                  <span class="text-slate-500">ชั่งใหม่ได้:</span>
+                  <input type="number" value="${row.usedWeight || ''}" placeholder="0" min="0" 
+                    oninput="updateBaseRow('${baseId}',${idx}, 'usedWeight', this.value)"
+                    class="w-16 text-xs border border-amber-300 bg-amber-50 rounded px-1.5 py-0.5 text-right font-mono focus:ring-1 focus:ring-amber-500" />
+                  <span class="text-slate-500">g</span>
+                </div>
+              ` : ''}
+            </div>
           </div>
         `;
       }).join('');
     }
 
+    function toggleReWeighMode(baseId, idx) {
+      const row = dynamicRows[baseId][idx];
+      row.isReWeighed = !row.isReWeighed;
+      if (row.isReWeighed && !row.initialGross) {
+        row.initialGross = row.grossWeight || 0;
+      } else if (!row.isReWeighed) {
+        row.grossWeight = row.initialGross || row.grossWeight;
+        row.usedWeight = 0;
+      }
+      renderBaseRows(baseId);
+      calculateAll();
+    }
+
     function addBaseRow(baseId) {
       const cfg = BASE_CONFIGS.find(c => c.id === baseId);
-      dynamicRows[baseId].push({ id: Date.now() + Math.random(), tareKey: cfg.defaultContainer, grossWeight: 0 });
+      dynamicRows[baseId].push({ id: Date.now() + Math.random(), tareKey: cfg.defaultContainer, grossWeight: 0, isReWeighed: false, initialGross: 0, usedWeight: 0 });
       renderBaseRows(baseId);
       calculateAll();
     }
 
     function addFullBatchRow(baseId) {
       const cfg = BASE_CONFIGS.find(c => c.id === baseId);
-      // Tare 'none' (0g) and set grossWeight to full batch yield
-      dynamicRows[baseId].push({ id: Date.now() + Math.random(), tareKey: 'none', grossWeight: cfg.fullBatchYield });
+      dynamicRows[baseId].push({ id: Date.now() + Math.random(), tareKey: 'none', grossWeight: cfg.fullBatchYield, isReWeighed: false, initialGross: 0, usedWeight: 0 });
       renderBaseRows(baseId);
       calculateAll();
     }
@@ -484,10 +521,14 @@
     }
 
     function updateBaseRow(baseId, idx, field, value) {
-      if (field === 'grossWeight') {
-        dynamicRows[baseId][idx].grossWeight = parseFloat(value) || 0;
-      } else {
-        dynamicRows[baseId][idx][field] = value;
+      const valNum = parseFloat(value) || 0;
+      dynamicRows[baseId][idx][field] = valNum;
+      
+      const r = dynamicRows[baseId][idx];
+      if (field === 'initialGross') {
+        if (!r.isReWeighed) {
+          r.grossWeight = valNum;
+        }
       }
       calculateAll();
     }
@@ -497,7 +538,7 @@
       container.innerHTML = '';
 
       SYRUP_CONFIGS.forEach(cfg => {
-        dynamicRows[cfg.id] = [{ id: Date.now() + Math.random(), tareKey: 'monin_empty', grossWeight: 0 }];
+        dynamicRows[cfg.id] = [{ id: Date.now() + Math.random(), tareKey: 'monin_empty', grossWeight: 0, isReWeighed: false, initialGross: 0, usedWeight: 0 }];
 
         const card = document.createElement('div');
         card.className = "bg-slate-50 rounded-lg p-4 border border-slate-200 shadow-sm flex flex-col justify-between";
@@ -535,12 +576,32 @@
 
       if (cfg.fixedTare !== null) {
         const row = rows[0] || { grossWeight: 0 };
+        const displayWeight = row.isReWeighed ? (row.initialGross || '') : (row.grossWeight || '');
+
         rowsContainer.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-600 flex-1">ภาชนะตายตัว (-${cfg.fixedTare}g)</span>
-            <input type="number" value="${row.grossWeight || ''}" placeholder="0" min="0" oninput="updateSyrupRow('${syrupId}', 0, 'grossWeight', this.value)"
-              class="w-24 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-indigo-500 bg-white" />
-            <span class="text-xs text-slate-500">g</span>
+          <div class="flex flex-col gap-1 p-2 bg-white rounded border border-slate-200 shadow-xs">
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-600 flex-1">ภาชนะตายตัว (-${cfg.fixedTare}g)</span>
+              <input type="number" value="${displayWeight}" placeholder="${row.isReWeighed ? 'ค่าน้ำหนักเดิม' : '0'}" min="0" 
+                oninput="updateSyrupRow('${syrupId}', 0, '${row.isReWeighed ? 'initialGross' : 'grossWeight'}', this.value)"
+                class="w-24 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-indigo-500 bg-white" />
+              <span class="text-xs text-slate-500">g</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
+              <button onclick="toggleSyrupReWeighMode('${syrupId}', 0)" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+                <i class="fa-solid ${row.isReWeighed ? 'fa-square-check text-emerald-600' : 'fa-scale-unbalanced'}"></i>
+                ${row.isReWeighed ? 'โหมด: ชั่งใหม่หลังใช้' : '+ชั่งใหม่หลังใช้'}
+              </button>
+              ${row.isReWeighed ? `
+                <div class="flex items-center gap-1">
+                  <span class="text-slate-500">ชั่งใหม่ได้:</span>
+                  <input type="number" value="${row.usedWeight || ''}" placeholder="0" min="0" 
+                    oninput="updateSyrupRow('${syrupId}', 0, 'usedWeight', this.value)"
+                    class="w-16 text-xs border border-amber-300 bg-amber-50 rounded px-1.5 py-0.5 text-right font-mono focus:ring-1 focus:ring-indigo-500" />
+                  <span class="text-slate-500">g</span>
+                </div>
+              ` : ''}
+            </div>
           </div>
         `;
         return;
@@ -555,19 +616,38 @@
       `;
 
       rowsContainer.innerHTML = rows.map((row, idx) => {
+        const displayWeight = row.isReWeighed ? (row.initialGross || '') : (row.grossWeight || '');
         return `
-          <div class="flex items-center gap-2">
-            <select onchange="updateSyrupRow('${syrupId}', ${idx}, 'tareKey', this.value)" class="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:ring-1 focus:ring-indigo-500 flex-1">
-              ${containerOptionsHTML}
-            </select>
-            <input type="number" value="${row.grossWeight || ''}" placeholder="0" min="0" oninput="updateSyrupRow('${syrupId}', ${idx}, 'grossWeight', this.value)"
-              class="w-20 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-indigo-500 bg-white" />
-            <span class="text-xs text-slate-500">g</span>
-            ${rows.length > 1 ? `
-              <button onclick="removeSyrupRow('${syrupId}',${idx})" class="text-slate-400 hover:text-red-500 text-sm px-1">
-                <i class="fa-solid fa-xmark"></i>
+          <div class="flex flex-col gap-1 p-2 bg-white rounded border border-slate-200 shadow-xs">
+            <div class="flex items-center gap-2">
+              <select onchange="updateSyrupRow('${syrupId}', ${idx}, 'tareKey', this.value)" class="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:ring-1 focus:ring-indigo-500 flex-1">
+                ${containerOptionsHTML}
+              </select>
+              <input type="number" value="${displayWeight}" placeholder="${row.isReWeighed ? 'ค่าน้ำหนักเดิม' : '0'}" min="0" 
+                oninput="updateSyrupRow('${syrupId}', ${idx}, '${row.isReWeighed ? 'initialGross' : 'grossWeight'}', this.value)"
+                class="w-20 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-indigo-500 bg-white" />
+              <span class="text-xs text-slate-500">g</span>
+              ${rows.length > 1 ? `
+                <button onclick="removeSyrupRow('${syrupId}',${idx})" class="text-slate-400 hover:text-red-500 text-sm px-1">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              ` : '<span class="w-4"></span>'}
+            </div>
+            <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
+              <button onclick="toggleSyrupReWeighMode('${syrupId}', ${idx})" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+                <i class="fa-solid ${row.isReWeighed ? 'fa-square-check text-emerald-600' : 'fa-scale-unbalanced'}"></i>
+                ${row.isReWeighed ? 'โหมด: ชั่งใหม่หลังใช้' : '+ชั่งใหม่หลังใช้'}
               </button>
-            ` : '<span class="w-4"></span>'}
+              ${row.isReWeighed ? `
+                <div class="flex items-center gap-1">
+                  <span class="text-slate-500">ชั่งใหม่ได้:</span>
+                  <input type="number" value="${row.usedWeight || ''}" placeholder="0" min="0" 
+                    oninput="updateSyrupRow('${syrupId}',${idx}, 'usedWeight', this.value)"
+                    class="w-16 text-xs border border-amber-300 bg-amber-50 rounded px-1.5 py-0.5 text-right font-mono focus:ring-1 focus:ring-indigo-500" />
+                  <span class="text-slate-500">g</span>
+                </div>
+              ` : ''}
+            </div>
           </div>
         `;
       }).join('');
@@ -580,8 +660,21 @@
       });
     }
 
+    function toggleSyrupReWeighMode(syrupId, idx) {
+      const row = dynamicRows[syrupId][idx];
+      row.isReWeighed = !row.isReWeighed;
+      if (row.isReWeighed && !row.initialGross) {
+        row.initialGross = row.grossWeight || 0;
+      } else if (!row.isReWeighed) {
+        row.grossWeight = row.initialGross || row.grossWeight;
+        row.usedWeight = 0;
+      }
+      renderSyrupRows(syrupId);
+      calculateAll();
+    }
+
     function addSyrupRow(syrupId) {
-      dynamicRows[syrupId].push({ id: Date.now() + Math.random(), tareKey: 'monin_empty', grossWeight: 0 });
+      dynamicRows[syrupId].push({ id: Date.now() + Math.random(), tareKey: 'monin_empty', grossWeight: 0, isReWeighed: false, initialGross: 0, usedWeight: 0 });
       renderSyrupRows(syrupId);
       calculateAll();
     }
@@ -593,10 +686,18 @@
     }
 
     function updateSyrupRow(syrupId, idx, field, value) {
-      if (field === 'grossWeight') {
-        dynamicRows[syrupId][idx].grossWeight = parseFloat(value) || 0;
+      const valNum = parseFloat(value) || 0;
+      if (field === 'tareKey') {
+        dynamicRows[syrupId][idx].tareKey = value;
       } else {
-        dynamicRows[syrupId][idx][field] = value;
+        dynamicRows[syrupId][idx][field] = valNum;
+      }
+
+      const r = dynamicRows[syrupId][idx];
+      if (field === 'initialGross') {
+        if (!r.isReWeighed) {
+          r.grossWeight = valNum;
+        }
       }
       calculateAll();
     }
@@ -642,7 +743,17 @@
 
         rows.forEach(r => {
           const tare = CONTAINERS[r.tareKey] ? CONTAINERS[r.tareKey].val : 0;
-          const net = Math.max(0, r.grossWeight - tare);
+          let effectiveGross = r.grossWeight || 0;
+
+          if (r.isReWeighed) {
+            // ถ้าน้ำหนักเดิมคือ 1866 และชั่งใหม่ได้ 1555 -> นำน้ำหนักเดิมมาหักลบกับน้ำหนักที่ชั่งใหม่
+            const initial = r.initialGross || 0;
+            const used = r.usedWeight || 0;
+            const remainingGross = Math.max(0, initial - used);
+            effectiveGross = remainingGross;
+          }
+
+          const net = Math.max(0, effectiveGross - tare);
           totalNetInBaseCard += net;
         });
 
@@ -671,7 +782,15 @@
           } else if (CONTAINERS[r.tareKey]) {
             tare = CONTAINERS[r.tareKey].val;
           }
-          const net = Math.max(0, r.grossWeight - tare);
+
+          let effectiveGross = r.grossWeight || 0;
+          if (r.isReWeighed) {
+            const initial = r.initialGross || 0;
+            const used = r.usedWeight || 0;
+            effectiveGross = Math.max(0, initial - used);
+          }
+
+          const net = Math.max(0, effectiveGross - tare);
           totalNetSyrup += net;
         });
 
@@ -739,7 +858,7 @@
       `).join('');
     }
 
-    // --- SUMMARY TEXT FORMATTER (Short & Clean) ---
+    // --- SUMMARY TEXT FORMATTER ---
     function generateCleanSummaryText() {
       let text = "📋 === สรุปวัตถุดิบที่เหลือ ===\n\n";
       let count = 0;
@@ -770,7 +889,11 @@
         let totalNet = 0;
         rows.forEach(r => {
           const tare = CONTAINERS[r.tareKey] ? CONTAINERS[r.tareKey].val : 0;
-          totalNet += Math.max(0, r.grossWeight - tare);
+          let effectiveGross = r.grossWeight || 0;
+          if (r.isReWeighed) {
+            effectiveGross = Math.max(0, (r.initialGross || 0) - (r.usedWeight || 0));
+          }
+          totalNet += Math.max(0, effectiveGross - tare);
         });
         const res = cfg.calc(totalNet);
         if (res[itemId]) sum += res[itemId];
@@ -783,7 +906,12 @@
             let tare = 0;
             if (cfg.fixedTare !== null) tare = cfg.fixedTare;
             else if (CONTAINERS[r.tareKey]) tare = CONTAINERS[r.tareKey].val;
-            sum += Math.max(0, r.grossWeight - tare);
+            
+            let effectiveGross = r.grossWeight || 0;
+            if (r.isReWeighed) {
+              effectiveGross = Math.max(0, (r.initialGross || 0) - (r.usedWeight || 0));
+            }
+            sum += Math.max(0, effectiveGross - tare);
           });
         }
       });
@@ -825,3 +953,4 @@
   </script>
 </body>
 </html>
+
