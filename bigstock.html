@@ -1,573 +1,1480 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cafe Stock Counter</title>
-    <style>
-        :root {
-            --bg-color: #f7f4ef;
-            --card-bg: #ffffff;
-            --text-main: #333333;
-            --text-muted: #666666;
-            --accent: #4a3b32;
-            --accent-light: #efebe4;
-            --border: #e2ddd5;
-            --success: #2e7d32;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cafe Management System - Stock & Barista Calculator</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+      --bg-color: #f7f4ef;
+      --card-bg: #ffffff;
+      --text-main: #333333;
+      --text-muted: #666666;
+      --accent: #4a3b32;
+      --accent-light: #efebe4;
+      --border: #e2ddd5;
+    }
 
-        * {
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+    body {
+      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+    }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 12px;
-            padding-bottom: 90px;
-        }
+    .badge-sub {
+      background-color: #f3e8ff;
+      color: #6b21a8;
+      border: 1px solid #d8b4fe;
+    }
 
-        .header {
-            position: sticky;
-            top: 0;
-            background-color: var(--bg-color);
-            padding: 8px 0 12px 0;
-            z-index: 100;
-        }
+    .bg-summary-card {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
 
-        h1 {
-            font-size: 1.3rem;
-            margin: 0 0 10px 0;
-            color: var(--accent);
-            text-align: center;
-        }
+    /* Dry Stock Styles */
+    .search-box {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      background: white;
+    }
 
-        .search-box {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 0.95rem;
-            outline: none;
-            background: white;
-        }
+    .item-card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
 
-        .item-card {
-            background: var(--card-bg);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 10px;
-            border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
 
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
+    .item-name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
 
-        .item-name {
-            font-weight: 600;
-            font-size: 1rem;
-        }
+    .item-badge {
+      font-size: 0.75rem;
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
 
-        .item-badge {
-            font-size: 0.75rem;
-            background: var(--accent-light);
-            color: var(--accent);
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
+    .btn-copy-item {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      padding: 3px 6px;
+      cursor: pointer;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
 
-        .btn-copy-item {
-            background: none;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: 0.75rem;
-            padding: 3px 6px;
-            cursor: pointer;
-            color: var(--text-muted);
-            margin-left: 6px;
-        }
+    .input-group-dry {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
 
-        .input-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-        }
+    .input-group-dry label {
+      font-size: 0.85rem;
+      width: 65px;
+      color: var(--text-muted);
+    }
 
-        .input-group label {
-            font-size: 0.85rem;
-            width: 55px;
-            color: var(--text-muted);
-        }
+    .pieces-container {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-        input[type="number"] {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 1rem;
-            outline: none;
-        }
+    .piece-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
 
-        input[type="number"]:focus {
-            border-color: var(--accent);
-        }
+    .btn-remove {
+      background: #ffebee;
+      color: #c62828;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-        .pieces-container {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
+    .btn-add-piece {
+      background: none;
+      border: 1px dashed var(--accent);
+      color: var(--accent);
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      margin-top: 4px;
+      width: 100%;
+    }
 
-        .piece-row {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
+    .item-summary {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+    }
 
-        .btn-remove {
-            background: #ffebee;
-            color: #c62828;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+    .total-highlight {
+      color: var(--accent);
+    }
 
-        .btn-add-piece {
-            background: none;
-            border: 1px dashed var(--accent);
-            color: var(--accent);
-            padding: 6px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            margin-top: 4px;
-            width: 100%;
-        }
+    .footer-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      z-index: 40;
+    }
 
-        .item-summary {
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px dashed var(--border);
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-            font-weight: 600;
-        }
+    .btn-main {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-align: center;
+    }
 
-        .total-highlight {
-            color: var(--accent);
-        }
+    .btn-summary { background: var(--accent); color: white; }
+    .btn-copy-all { background: var(--accent-light); color: var(--accent); }
+    .btn-paste-all { background: #e3f2fd; color: #1565c0; }
 
-        .footer-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            padding: 10px 16px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 8px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-        }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
 
-        .btn-main {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .btn-summary {
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-copy-all {
-            background: var(--accent-light);
-            color: var(--accent);
-        }
-
-        .btn-paste-all {
-            background: #e3f2fd;
-            color: #1565c0;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            width: 100%;
-            max-width: 500px;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-header {
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 8px;
-        }
-
-        .modal-body {
-            flex: 1;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            font-family: monospace;
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            font-size: 0.85rem;
-            margin-bottom: 12px;
-        }
-
-        textarea.modal-input {
-            width: 100%;
-            height: 150px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            padding: 8px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            margin-bottom: 12px;
-            resize: none;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 8px;
-        }
-    </style>
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
 </head>
-<body>
+<body class="pb-28">
 
-    <div class="header">
-        <h1>☕ Cafe Stock Counter</h1>
-        <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหารายการสินค้า..." oninput="filterItems()">
+  <!-- Header Navigation Tabs -->
+  <header class="bg-indigo-900 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-mug-hot text-amber-400 text-2xl"></i>
+          <div>
+            <h1 class="text-lg md:text-xl font-bold text-white">ระบบการจัดการสต็อกคาเฟ่ (Cafe Manager)</h1>
+          </div>
+        </div>
+        
+        <!-- Navigation Buttons -->
+        <div class="flex bg-indigo-950 p-1 rounded-lg border border-indigo-700 w-full sm:w-auto">
+          <button id="tab-btn-dry" onclick="switchPage('dry')" class="flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-semibold transition duration-150 bg-amber-500 text-slate-900 shadow">
+            <i class="fa-solid fa-boxes-packing mr-1"></i> นับสต็อกของแห้ง
+          </button>
+          <button id="tab-btn-liquid" onclick="switchPage('liquid')" class="flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-semibold transition duration-150 text-indigo-200 hover:text-white">
+            <i class="fa-solid fa-flask mr-1"></i> คำนวณสูตรน้ำ & ไซรัป
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== PAGE 1: DRY STOCK COUNTING ==================== -->
+  <div id="page-dry" class="max-w-4xl mx-auto px-4 py-4">
+    <div class="mb-4">
+      <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหารายการสินค้าของแห้ง..." oninput="filterItems()">
     </div>
 
     <div id="itemsContainer"></div>
 
     <div class="footer-bar">
-        <button class="btn-main btn-copy-all" onclick="openCopyModal()">📋 คัดลอกข้อมูล</button>
-        <button class="btn-main btn-paste-all" onclick="openPasteModal()">📥 วางข้อมูล</button>
-        <button class="btn-main btn-summary" onclick="generateSummary()">📊 สรุปทั้งหมด</button>
+      <button class="btn-main btn-copy-all" onclick="openCopyModal()">📋 คัดลอกรหัส</button>
+      <button class="btn-main btn-paste-all" onclick="openPasteModal()">📥 วางรหัส</button>
+      <button class="btn-main btn-summary" onclick="generateSummary()">📊 สรุปทั้งหมด</button>
+    </div>
+  </div>
+
+  <!-- ==================== PAGE 2: LIQUID & SYRUP CALCULATOR ==================== -->
+  <div id="page-liquid" class="max-w-7xl mx-auto px-4 py-6 space-y-8 hidden">
+
+    <!-- Actions Header -->
+    <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+      <div>
+        <h2 class="font-bold text-slate-800 text-base md:text-lg">ระบบคำนวณวัตถุดิบและไซรัป</h2>
+        <p class="text-xs text-slate-500">คำนวณการสกัด หักน้ำหนักภาชนะ สรุปมวลเป็น g และ ml</p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="openModalSummary()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-3 py-2 rounded-lg text-sm shadow transition flex items-center gap-1.5">
+          <i class="fa-solid fa-file-invoice"></i> สรุปวัตถุดิบที่เหลือ
+        </button>
+        <button onclick="resetAllInputs()" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-2 rounded-lg text-sm shadow transition flex items-center gap-1">
+          <i class="fa-solid fa-rotate-left"></i> รีเซ็ต
+        </button>
+      </div>
     </div>
 
-    <!-- Modal สำหรับแสดงผลสรุป / คัดลอก -->
-    <div id="textModal" class="modal">
-        <div class="modal-content">
-            <div id="modalTitle" class="modal-header">สรุปรายการ</div>
-            <div id="modalText" class="modal-body"></div>
-            <textarea id="modalTextarea" class="modal-input" style="display:none;" placeholder="วางโค้ดข้อมูลสต็อกที่นี่..."></textarea>
-            <div class="modal-actions">
-                <button id="modalActionBtn" class="btn-main btn-summary" onclick="copyModalContent()">คัดลอกข้อความ</button>
-                <button class="btn-main btn-copy-all" onclick="closeModal()">ปิด</button>
-            </div>
+    <!-- Section 1: BASE PREPARATIONS -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-amber-800 text-white px-6 py-4 flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-flask"></i> 1. หมวดเตรียม Base & สูตรเครื่องดื่ม</h2>
+          <p class="text-xs text-amber-100 mt-0.5">กรอกน้ำหนักรวม หรือกด '+1 สูตร' หรือกด '+ชั่งใหม่หลังใช้' เพื่อใส่ค่าน้ำหนักใหม่</p>
         </div>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="baseCardsContainer">
+          <!-- Dynamically injected Base cards -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: SYRUP SECTION -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-indigo-800 text-white px-6 py-4 flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-bottle-droplet"></i> 2. หมวด ไซรัป (Syrups)</h2>
+          <p class="text-xs text-indigo-100 mt-0.5">คำนวณหักน้ำหนักขวด Monin / LongBeach (ขวดเปล่า 60g / พร้อมฝาปั้ม 90g) / ขวดเฉพาะทาง</p>
+        </div>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="syrupCardsContainer">
+          <!-- Dynamically injected Syrup cards -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: DIRECT MATERIAL INVENTORY -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="bg-emerald-800 text-white px-6 py-4 flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-boxes-stacked"></i> 3. คลังวัตถุดิบหลัก / กรอกตรง & รวมสุทธิ</h2>
+          <p class="text-xs text-emerald-100 mt-0.5">รวมผลลัพธ์จากข้อ 1, 2 และสามารถกรอกน้ำหนักวัตถุดิบที่นับตรงเพิ่มเติมได้ในช่อง 'กรอกตรง'</p>
+        </div>
+      </div>
+      
+      <div class="p-6 overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[700px]">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 text-xs uppercase border-b border-slate-200">
+              <th class="py-3 px-4 font-bold">ชื่อวัตถุดิบ</th>
+              <th class="py-3 px-4 font-bold">กรอกตรง / ตัวเอง</th>
+              <th class="py-3 px-4 font-bold">คำนวณมาจาก Base/Syrup</th>
+              <th class="py-3 px-4 font-bold">รวมทั้งหมด</th>
+              <th class="py-3 px-4 font-bold">นับจำนวนแพ็คเกจ / ขวด / ถุง</th>
+            </tr>
+          </thead>
+          <tbody id="inventoryTableBody" class="divide-y divide-slate-100 text-sm">
+            <!-- Dynamically populated inventory rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 4: BOTTOM SUMMARY -->
+    <section class="bg-summary-card text-white rounded-xl shadow-lg p-6 border border-slate-700">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-700 pb-4 mb-4 gap-3">
+        <div>
+          <h2 class="text-xl font-bold text-amber-400 flex items-center gap-2">
+            <i class="fa-solid fa-list-check"></i> สรุปวัตถุดิบที่มีอยู่ (กระชับ อ่านง่าย)
+          </h2>
+          <p class="text-xs text-slate-300 mt-1">แสดงผลเฉพาะรายการที่มีมากกว่า 0 ในรูปแบบ "ชื่อวัตถุดิบ เหลือ [จำนวน]"</p>
+        </div>
+        <button onclick="copyActiveSummaryText()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition duration-150">
+          <i class="fa-solid fa-copy"></i> คัดลอกสรุป
+        </button>
+      </div>
+
+      <div id="bottomSummaryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- Active items injected here -->
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Shared Modals -->
+  <div id="textModal" class="modal">
+    <div class="modal-content">
+      <div id="modalTitle" class="font-bold text-lg mb-2">สรุปรายการ</div>
+      <div id="modalText" class="flex-1 overflow-y-auto font-mono bg-slate-100 p-3 rounded text-xs leading-relaxed whitespace-pre-wrap mb-3 border"></div>
+      <textarea id="modalTextarea" class="w-full h-36 font-mono text-xs p-2 border rounded mb-3 resize-none" style="display:none;" placeholder="วางโค้ดข้อมูลสต็อกที่นี่..."></textarea>
+      <div class="flex justify-end gap-2">
+        <button id="modalActionBtn" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded text-sm">คัดลอกข้อความ</button>
+        <button onclick="closeModal()" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-semibold px-4 py-2 rounded text-sm">ปิด</button>
+      </div>
     </div>
+  </div>
 
-    <script>
-        const itemsData = [
-            { id: 'item_1', name: 'นมข้นหวาน', unit: 'ขวด', packSize: 0 },
-            { id: 'item_2', name: 'นมข้นจืด', unit: 'ขวด', packSize: 0 },
-            { id: 'item_3', name: 'Cake box', unit: 'ชิ้น', packSize: 0 },
-            { id: 'item_4', name: 'Hot cup (แก้วร้อนฟ้า)', unit: 'ชิ้น', packSize: 50 },
-            { id: 'item_5', name: '16oz cup (แก้วเย็น)', unit: 'ชิ้น', packSize: 50 },
-            { id: 'item_6', name: 'Bite satchel (ถุงขนม)', unit: 'ชิ้น', packSize: 0 },
-            { id: 'item_7', name: 'Parchment paper (แผ่นรองอบขนม)', unit: 'ชิ้น', packSize: 0 },
-            { id: 'item_8', name: 'หลอด', unit: 'ชิ้น', packSize: 50 },
-            { id: 'item_9', name: '2Bag (ถุง 2)', unit: 'ชิ้น', packSize: 25 },
-            { id: 'item_10', name: 'สติ๊กเกอร์แจก Deli', unit: 'ชิ้น', packSize: 500 },
-            { id: 'item_11', name: 'สติ๊กเกอร์เก่า', unit: 'ชิ้น', packSize: 1000 },
-            { id: 'item_12', name: 'Cup sleeves', unit: 'ชิ้น', packSize: 50 },
-            { id: 'item_13', name: '4 Carrier (รังไข่ 4)', unit: 'ชิ้น', packSize: 75 },
-            { id: 'item_14', name: '2 Carrier (รังไข่ 2)', unit: 'ชิ้น', packSize: 50 },
-            { id: 'item_15', name: '4cupbag (ถุง 4)', unit: 'ชิ้น', packSize: 25 },
-            { id: 'item_16', name: 'Insulated bag (ถุง deli)', unit: 'ชิ้น', packSize: 50 },
-            { id: 'item_17', name: 'Black cup lid (ฝาดำ)', unit: 'ชิ้น', packSize: 50 },
-            { id: 'item_18', name: 'White cup lid (ฝาร้อนขาว)', unit: 'ชิ้น', packSize: 50 },
-            { id: 'item_19', name: '16oz cup lid (ฝาแก้วเย็น 16oz)', unit: 'ชิ้น', packSize: 100 },
-            { id: 'item_20', name: 'Dome cup lid (ฝาโดม)', unit: 'ชิ้น', packSize: 100 },
-            { id: 'item_21', name: 'Napkin (ทิชชู่ลูกค้าอันเล็ก)', unit: 'ชิ้น', packSize: 100 },
-            { id: 'item_22', name: 'Wooden spoon', unit: 'ชิ้น', packSize: 100 },
-            { id: 'item_23', name: 'Wooden fork', unit: 'ชิ้น', packSize: 100 },
-            { id: 'item_24', name: 'Gpp', unit: 'ชิ้น', packSize: 100 },
-            { id: 'item_25', name: '02', unit: 'ชิ้น', packSize: 0 },
-            { id: 'item_26', name: '09', unit: 'ชิ้น', packSize: 0 },
-            { id: 'item_27', name: '10', unit: 'ชิ้น', packSize: 0 },
-            { id: 'item_28', name: 'ถุงน้ำแข็ง', unit: 'ชิ้น', packSize: 100 },
-            { id: 'item_29', name: 'Stirrer (ไม้คนกาแฟ)', unit: 'ชิ้น', packSize: 100 }
-        ];
+  <div id="summaryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="bg-indigo-900 text-white px-6 py-4 flex justify-between items-center">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-receipt"></i> สรุปวัตถุดิบที่เหลือ</h3>
+        <button onclick="closeModalSummary()" class="text-indigo-200 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+      <div class="p-6 overflow-y-auto flex-1">
+        <pre id="summaryTextOutput" class="bg-slate-900 text-amber-300 p-4 rounded-lg font-mono text-base leading-relaxed whitespace-pre-wrap select-all"></pre>
+      </div>
+      <div class="bg-slate-100 px-6 py-3 flex justify-end gap-2 border-t border-slate-200">
+        <button onclick="copyModalSummaryText()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+          <i class="fa-solid fa-copy"></i> คัดลอก
+        </button>
+        <button onclick="closeModalSummary()" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-semibold px-4 py-2 rounded-lg text-sm">
+          ปิด
+        </button>
+      </div>
+    </div>
+  </div>
 
-        let clipboardState = null;
+  <script>
+    // --- TAB NAVIGATION ---
+    function switchPage(page) {
+      const pageDry = document.getElementById('page-dry');
+      const pageLiquid = document.getElementById('page-liquid');
+      const btnDry = document.getElementById('tab-btn-dry');
+      const btnLiquid = document.getElementById('tab-btn-liquid');
 
-        function initApp() {
-            const container = document.getElementById('itemsContainer');
-            container.innerHTML = '';
+      if (page === 'dry') {
+        pageDry.classList.remove('hidden');
+        pageLiquid.classList.add('hidden');
+        btnDry.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-semibold transition duration-150 bg-amber-500 text-slate-900 shadow";
+        btnLiquid.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-semibold transition duration-150 text-indigo-200 hover:text-white";
+      } else {
+        pageDry.classList.add('hidden');
+        pageLiquid.classList.remove('hidden');
+        btnLiquid.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-semibold transition duration-150 bg-amber-500 text-slate-900 shadow";
+        btnDry.className = "flex-1 sm:flex-none px-4 py-1.5 rounded-md text-sm font-semibold transition duration-150 text-indigo-200 hover:text-white";
+      }
+    }
 
-            itemsData.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'item-card';
-                card.id = `card_${item.id}`;
-                card.setAttribute('data-name', item.name.toLowerCase());
+    // ==================== PAGE 1: DRY STOCK SCRIPT ====================
+    const itemsData = [
+      { id: 'item_1', name: 'นมข้นหวาน', unit: 'ขวด', packSize: 0 },
+      { id: 'item_2', name: 'นมข้นจืด', unit: 'ขวด', packSize: 0 },
+      { id: 'item_3', name: 'Cake box', unit: 'ชิ้น', packSize: 0 },
+      { id: 'item_4', name: 'Hot cup (แก้วร้อนฟ้า)', unit: 'ชิ้น', packSize: 50 },
+      { id: 'item_5', name: '16oz cup (แก้วเย็น)', unit: 'ชิ้น', packSize: 50 },
+      { id: 'item_6', name: 'Bite satchel (ถุงขนม)', unit: 'ชิ้น', packSize: 0 },
+      { id: 'item_7', name: 'Parchment paper (แผ่นรองอบขนม)', unit: 'ชิ้น', packSize: 0 },
+      { id: 'item_8', name: 'หลอด', unit: 'ชิ้น', packSize: 50 },
+      { id: 'item_9', name: '2Bag (ถุง 2)', unit: 'ชิ้น', packSize: 25 },
+      { id: 'item_10', name: 'สติ๊กเกอร์แจก Deli', unit: 'ชิ้น', packSize: 500 },
+      { id: 'item_11', name: 'สติ๊กเกอร์เก่า', unit: 'ชิ้น', packSize: 1000 },
+      { id: 'item_12', name: 'Cup sleeves', unit: 'ชิ้น', packSize: 50 },
+      { id: 'item_13', name: '4 Carrier (รังไข่ 4)', unit: 'ชิ้น', packSize: 75 },
+      { id: 'item_14', name: '2 Carrier (รังไข่ 2)', unit: 'ชิ้น', packSize: 50 },
+      { id: 'item_15', name: '4cupbag (ถุง 4)', unit: 'ชิ้น', packSize: 25 },
+      { id: 'item_16', name: 'Insulated bag (ถุง deli)', unit: 'ชิ้น', packSize: 50 },
+      { id: 'item_17', name: 'Black cup lid (ฝาดำ)', unit: 'ชิ้น', packSize: 50 },
+      { id: 'item_18', name: 'White cup lid (ฝาร้อนขาว)', unit: 'ชิ้น', packSize: 50 },
+      { id: 'item_19', name: '16oz cup lid (ฝาแก้วเย็น 16oz)', unit: 'ชิ้น', packSize: 100 },
+      { id: 'item_20', name: 'Dome cup lid (ฝาโดม)', unit: 'ชิ้น', packSize: 100 },
+      { id: 'item_21', name: 'Napkin (ทิชชู่ลูกค้าอันเล็ก)', unit: 'ชิ้น', packSize: 100 },
+      { id: 'item_22', name: 'Wooden spoon', unit: 'ชิ้น', packSize: 100 },
+      { id: 'item_23', name: 'Wooden fork', unit: 'ชิ้น', packSize: 100 },
+      { id: 'item_24', name: 'Gpp', unit: 'ชิ้น', packSize: 100 },
+      { id: 'item_25', name: '02', unit: 'ชิ้น', packSize: 0 },
+      { id: 'item_26', name: '09', unit: 'ชิ้น', packSize: 0 },
+      { id: 'item_27', name: '10', unit: 'ชิ้น', packSize: 0 },
+      { id: 'item_28', name: 'ถุงน้ำแข็ง', unit: 'ชิ้น', packSize: 100 },
+      { id: 'item_29', name: 'Stirrer (ไม้คนกาแฟ)', unit: 'ชิ้น', packSize: 100 }
+    ];
 
-                let packHTML = '';
-                if (item.packSize > 0) {
-                    packHTML = `
-                        <div class="input-group">
-                            <label>แพ็ค:</label>
-                            <input type="number" id="pack_${item.id}" min="0" placeholder="0" oninput="updateCalculations('${item.id}')">
-                        </div>
-                    `;
-                }
+    let clipboardState = null;
 
-                card.innerHTML = `
-                    <div class="item-header">
-                        <span class="item-name">${item.name}</span>
-                        <div>
-                            ${item.packSize > 0 ? `<span class="item-badge">แพ็คละ ${item.packSize}</span>` : ''}
-                            <button class="btn-copy-item" onclick="copyItemData('${item.id}')">📋 Copy</button>
-                            <button class="btn-copy-item" onclick="pasteItemData('${item.id}')">📥 Paste</button>
-                        </div>
-                    </div>
-                    ${packHTML}
-                    <div class="pieces-container" id="pieces_container_${item.id}">
-                        <div class="piece-row">
-                            <div class="input-group" style="flex:1; margin:0;">
-                                <label>${item.packSize > 0 ? 'เศษ/ชิ้น:' : 'จำนวน:'}</label>
-                                <input type="number" class="piece-input-${item.id}" min="0" placeholder="0" oninput="updateCalculations('${item.id}')">
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn-add-piece" onclick="addPieceInput('${item.id}')">+ เพิ่มช่องนับ (${item.unit})</button>
-                    <div class="item-summary">
-                        <span>รวมทั้งหมด:</span>
-                        <span class="total-highlight" id="total_${item.id}">0 ${item.unit}</span>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+    function initDryApp() {
+      const container = document.getElementById('itemsContainer');
+      container.innerHTML = '';
+
+      itemsData.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.id = `card_${item.id}`;
+        card.setAttribute('data-name', item.name.toLowerCase());
+
+        let packHTML = '';
+        if (item.packSize > 0) {
+          packHTML = `
+            <div class="input-group-dry">
+              <label>แพ็ค:</label>
+              <input type="number" id="pack_${item.id}" min="0" placeholder="0" oninput="updateCalculations('${item.id}')" class="w-full p-2 border rounded">
+            </div>
+          `;
         }
 
-        function addPieceInput(itemId, value = '') {
-            const container = document.getElementById(`pieces_container_${itemId}`);
-            const row = document.createElement('div');
-            row.className = 'piece-row';
-            row.innerHTML = `
-                <div class="input-group" style="flex:1; margin:0;">
-                    <label>เพิ่ม:</label>
-                    <input type="number" class="piece-input-${itemId}" min="0" value="${value}" placeholder="0" oninput="updateCalculations('${itemId}')">
+        card.innerHTML = `
+          <div class="item-header">
+            <span class="item-name">${item.name}</span>
+            <div>
+              ${item.packSize > 0 ? `<span class="item-badge">แพ็คละ ${item.packSize}</span>` : ''}
+              <button class="btn-copy-item" onclick="copyItemData('${item.id}')">📋 Copy</button>
+              <button class="btn-copy-item" onclick="pasteItemData('${item.id}')">📥 Paste</button>
+            </div>
+          </div>
+          ${packHTML}
+          <div class="pieces-container" id="pieces_container_${item.id}">
+            <div class="piece-row">
+              <div class="input-group-dry" style="flex:1; margin:0;">
+                <label>${item.packSize > 0 ? 'เศษ/ชิ้น:' : 'จำนวน:'}</label>
+                <input type="number" class="piece-input-${item.id} w-full p-2 border rounded" min="0" placeholder="0" oninput="updateCalculations('${item.id}')">
+              </div>
+            </div>
+          </div>
+          <button class="btn-add-piece" onclick="addPieceInput('${item.id}')">+ เพิ่มช่องนับ (${item.unit})</button>
+          <div class="item-summary">
+            <span>รวมทั้งหมด:</span>
+            <span class="total-highlight" id="total_${item.id}">0 ${item.unit}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function addPieceInput(itemId, value = '') {
+      const container = document.getElementById(`pieces_container_${itemId}`);
+      const row = document.createElement('div');
+      row.className = 'piece-row';
+      row.innerHTML = `
+        <div class="input-group-dry" style="flex:1; margin:0;">
+          <label>เพิ่ม:</label>
+          <input type="number" class="piece-input-${itemId} w-full p-2 border rounded" min="0" value="${value}" placeholder="0" oninput="updateCalculations('${itemId}')">
+        </div>
+        <button class="btn-remove" onclick="removePieceInput(this, '${itemId}')">✕</button>
+      `;
+      container.appendChild(row);
+      updateCalculations(itemId);
+    }
+
+    function removePieceInput(btn, itemId) {
+      btn.parentElement.remove();
+      updateCalculations(itemId);
+    }
+
+    function updateCalculations(itemId) {
+      const item = itemsData.find(i => i.id === itemId);
+      let total = 0;
+
+      if (item.packSize > 0) {
+        const packInput = document.getElementById(`pack_${itemId}`);
+        const packVal = parseFloat(packInput.value) || 0;
+        total += packVal * item.packSize;
+      }
+
+      const pieceInputs = document.querySelectorAll(`.piece-input-${itemId}`);
+      pieceInputs.forEach(input => {
+        total += parseFloat(input.value) || 0;
+      });
+
+      document.getElementById(`total_${itemId}`).innerText = `${total.toLocaleString()} ${item.unit}`;
+    }
+
+    function getItemState(itemId) {
+      const item = itemsData.find(i => i.id === itemId);
+      let packs = 0;
+      if (item.packSize > 0) {
+        const packInput = document.getElementById(`pack_${itemId}`);
+        packs = parseFloat(packInput.value) || 0;
+      }
+      const pieces = [];
+      document.querySelectorAll(`.piece-input-${itemId}`).forEach(input => {
+        pieces.push(parseFloat(input.value) || 0);
+      });
+      return { packs, pieces };
+    }
+
+    function setItemState(itemId, state) {
+      const item = itemsData.find(i => i.id === itemId);
+      if (item.packSize > 0) {
+        const packInput = document.getElementById(`pack_${itemId}`);
+        packInput.value = state.packs || '';
+      }
+
+      const container = document.getElementById(`pieces_container_${itemId}`);
+      container.innerHTML = '';
+      
+      const pieces = (state.pieces && state.pieces.length > 0) ? state.pieces : [0];
+      pieces.forEach((val, idx) => {
+        const row = document.createElement('div');
+        row.className = 'piece-row';
+        row.innerHTML = `
+          <div class="input-group-dry" style="flex:1; margin:0;">
+            <label>${idx === 0 ? (item.packSize > 0 ? 'เศษ/ชิ้น:' : 'จำนวน:') : 'เพิ่ม:'}</label>
+            <input type="number" class="piece-input-${itemId} w-full p-2 border rounded" min="0" value="${val || ''}" placeholder="0" oninput="updateCalculations('${itemId}')">
+          </div>
+          ${idx > 0 ? `<button class="btn-remove" onclick="removePieceInput(this, '${itemId}')">✕</button>` : ''}
+        `;
+        container.appendChild(row);
+      });
+      updateCalculations(itemId);
+    }
+
+    function copyItemData(itemId) {
+      clipboardState = getItemState(itemId);
+      alert('คัดลอกข้อมูลรายการนี้แล้ว');
+    }
+
+    function pasteItemData(itemId) {
+      if (!clipboardState) {
+        alert('ยังไม่มีข้อมูลที่คัดลอกไว้');
+        return;
+      }
+      setItemState(itemId, clipboardState);
+    }
+
+    function filterItems() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      itemsData.forEach(item => {
+        const card = document.getElementById(`card_${item.id}`);
+        if (item.name.toLowerCase().includes(query)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function generateSummary() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+      const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+      let text = `📋 สรุปรายการนับสต็อกคาเฟ่\n📅 วันที่: ${dateStr} เวลา ${timeStr}\n----------------------------------\n`;
+      let countedCount = 0;
+
+      itemsData.forEach(item => {
+        const state = getItemState(item.id);
+        let packVal = state.packs;
+        let pieceSum = state.pieces.reduce((a, b) => a + b, 0);
+        let total = (packVal * item.packSize) + pieceSum;
+
+        if (total > 0) {
+          countedCount++;
+          let detail = [];
+          if (packVal > 0) detail.push(`${packVal} แพ็ค`);
+          if (pieceSum > 0) detail.push(`เศษ ${pieceSum} ${item.unit}`);
+          
+          let detailStr = detail.length > 0 ? ` (${detail.join(' + ')})` : '';
+          text += `▫️ ${item.name}: ${total.toLocaleString()} ${item.unit}${detailStr}\n`;
+        }
+      });
+
+      text += `----------------------------------\nรวมทั้งหมด ${countedCount} รายการ`;
+
+      document.getElementById('modalTitle').innerText = 'สรุปรายการนับสต็อก';
+      document.getElementById('modalText').innerText = text;
+      document.getElementById('modalText').style.display = 'block';
+      document.getElementById('modalTextarea').style.display = 'none';
+      document.getElementById('modalActionBtn').innerText = 'คัดลอกข้อความ';
+      document.getElementById('modalActionBtn').onclick = () => {
+        navigator.clipboard.writeText(text);
+        alert('คัดลอกข้อความสรุปแล้ว!');
+      };
+      document.getElementById('textModal').style.display = 'flex';
+    }
+
+    function openCopyModal() {
+      const fullData = {};
+      itemsData.forEach(item => {
+        fullData[item.id] = getItemState(item.id);
+      });
+      const encoded = btoa(JSON.stringify(fullData));
+
+      document.getElementById('modalTitle').innerText = 'รหัสคัดลอกสต็อกทั้งหมด';
+      document.getElementById('modalText').innerText = encoded;
+      document.getElementById('modalText').style.display = 'block';
+      document.getElementById('modalTextarea').style.display = 'none';
+      document.getElementById('modalActionBtn').innerText = 'คัดลอกรหัส';
+      document.getElementById('modalActionBtn').onclick = () => {
+        navigator.clipboard.writeText(encoded);
+        alert('คัดลอกรหัสสต็อกเรียบร้อยแล้ว!');
+      };
+      document.getElementById('textModal').style.display = 'flex';
+    }
+
+    function openPasteModal() {
+      document.getElementById('modalTitle').innerText = 'นำเข้าข้อมูลสต็อก';
+      document.getElementById('modalText').style.display = 'none';
+      document.getElementById('modalTextarea').style.display = 'block';
+      document.getElementById('modalTextarea').value = '';
+      document.getElementById('modalActionBtn').innerText = 'นำเข้าข้อมูล';
+      document.getElementById('modalActionBtn').onclick = () => {
+        const code = document.getElementById('modalTextarea').value.trim();
+        if (!code) return;
+        try {
+          const data = JSON.parse(atob(code));
+          itemsData.forEach(item => {
+            if (data[item.id]) {
+              setItemState(item.id, data[item.id]);
+            }
+          });
+          alert('นำเข้าข้อมูลสำเร็จ!');
+          closeModal();
+        } catch (e) {
+          alert('รหัสไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง');
+        }
+      };
+      document.getElementById('textModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('textModal').style.display = 'none';
+    }
+
+    // ==================== PAGE 2: LIQUID & SYRUP CALCULATOR SCRIPT ====================
+    const CONTAINERS = {
+      none: { label: "ไม่มีภาชนะ (0g)", val: 0 },
+      shaker: { label: "shaker (ไม่รวมฝา) [103.7g]", val: 103.7 },
+      jug_small: { label: "เหยือกเล็ก [121.3g]", val: 121.3 },
+      jug_large: { label: "เหยือกใหญ่ [359g]", val: 359 },
+      squeeze_small: { label: "ขวดบีบ [72g]", val: 72 },
+      squeeze_large: { label: "ขวดบีบใหญ่ [100g]", val: 100 },
+      monin_empty: { label: "ขวด Monin เปล่า [462.3g]", val: 462.3 },
+      monin_pump: { label: "ขวด Monin ปั้ม [493.3g]", val: 493.3 },
+      lb_empty: { label: "ขวด LongBeach เปล่า [60g]", val: 60 },
+      lb_pump: { label: "ขวด LongBeach ปั้ม [90g]", val: 90 },
+      bs_empty: { label: "butter scotch (เปล่า) [125.0g]", val: 125.0 },
+      bs_pump: { label: "butter scotch (ฝาปั้ม) [199.1g]", val: 199.1 },
+      bs_squeeze: { label: "butter scotch (ขวดบีบ) [25.5g]", val: 25.5 }
+    };
+
+    const BASE_CONFIGS = [
+      {
+        id: "cham",
+        name: "Cham",
+        fullBatchYield: 874,
+        allowedContainers: ['shaker', 'jug_small', 'jug_large', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_small',
+        hasLargeJugOption: true, // Cham special option
+        calc: (net) => {
+          if (net <= 0) return { condensed_sweet: 0, condensed_evap: 0 };
+          const ratioSweet = 505 / 874;
+          const ratioEvap = 369 / 874;
+          return { condensed_sweet: net * ratioSweet, condensed_evap: net * ratioEvap };
+        },
+        badgeFormatter: (res) => `ข้นหวาน: ${res.condensed_sweet.toFixed(1)}g | ข้นจืด: ${res.condensed_evap.toFixed(1)}g`
+      },
+      {
+        id: "choc",
+        name: "ช็อค (Chocolate)",
+        fullBatchYield: 1000,
+        allowedContainers: ['squeeze_small', 'squeeze_large', 'jug_large', 'shaker', 'jug_small', 'none'],
+        defaultContainer: 'squeeze_small',
+        calc: (net) => {
+          if (net <= 0) return { choc_powder: 0 };
+          return { choc_powder: net * 0.40 };
+        },
+        badgeFormatter: (res) => `ผงช็อคเหลือ: ${res.choc_powder.toFixed(1)}g`
+      },
+      {
+        id: "matcha",
+        name: "มัจฉะ (Matcha)",
+        fullBatchYield: 1600,
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large',
+        calc: (net) => {
+          if (net <= 0) return { matcha_powder: 0 };
+          return { matcha_powder: net * (100 / 1600) };
+        },
+        badgeFormatter: (res) => `ผงมัจฉะเหลือ: ${res.matcha_powder.toFixed(1)}g`
+      },
+      {
+        id: "matcha_creme",
+        name: "มัจฉะครีม",
+        fullBatchYield: 310,
+        allowedContainers: ['jug_small', 'shaker', 'jug_large', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_small',
+        calc: (net) => {
+          if (net <= 0) return { meiji: 0, toppin: 0, matcha_powder: 0 };
+          const rMilk = 200 / 310;
+          const rTop = 100 / 310;
+          const rPowder = 10 / 310;
+          return { meiji: net * rMilk, toppin: net * rTop, matcha_powder: net * rPowder };
+        },
+        badgeFormatter: (res) => `นม: ${res.meiji.toFixed(1)}ml | Toppin: ${res.toppin.toFixed(1)}g | มัจฉะ: ${res.matcha_powder.toFixed(1)}g`
+      },
+      {
+        id: "butter_creme",
+        name: "บัตเตอร์ครีม",
+        fullBatchYield: 400,
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large',
+        calc: (net) => {
+          if (net <= 0) return { meiji: 0, toppin: 0 };
+          const rTop = 175 / 400;
+          const rMilk = 175 / 400;
+          return { meiji: net * rMilk, toppin: net * rTop };
+        },
+        badgeFormatter: (res) => `นม: ${res.meiji.toFixed(1)}ml | Toppin: ${res.toppin.toFixed(1)}g`
+      },
+      {
+        id: "butterscotch_squeeze",
+        name: "บัตเตอร์ scotch ขวดบีบ",
+        fullBatchYield: 200,
+        allowedContainers: ['bs_squeeze', 'bs_empty', 'bs_pump', 'none'],
+        defaultContainer: 'bs_squeeze',
+        calc: (net) => ({ butterscotch: Math.max(0, net) }),
+        badgeFormatter: (res) => `Butterscotch: ${res.butterscotch.toFixed(1)}g`
+      },
+      {
+        id: "butterscotch_pump",
+        name: "บัตเตอร์ scotch ขวดใหญ่ปั้ม",
+        fullBatchYield: 500,
+        allowedContainers: ['bs_pump', 'bs_empty', 'bs_squeeze', 'none'],
+        defaultContainer: 'bs_pump',
+        calc: (net) => ({ butterscotch: Math.max(0, net) }),
+        badgeFormatter: (res) => `Butterscotch: ${res.butterscotch.toFixed(1)}g`
+      },
+      {
+        id: "strawberry_creme",
+        name: "สตรอว์เบอร์รี่ครีม",
+        fullBatchYield: 232.5,
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large',
+        calc: (net) => {
+          if (net <= 0) return { toppin: 0, meiji: 0, strawberry: 0, lemonade_powder: 0 };
+          const rTop = 100 / 232.5;
+          const rMilk = 100 / 232.5;
+          const rStraw = 15 / 232.5;
+          const rLime = 17.5 / 232.5;
+          return { toppin: net * rTop, meiji: net * rMilk, strawberry: net * rStraw, lemonade_powder: net * rLime };
+        },
+        badgeFormatter: (res) => `Toppin: ${res.toppin.toFixed(1)}g | นม: ${res.meiji.toFixed(1)}ml | สตรอว์เบอร์รี่: ${res.strawberry.toFixed(1)}ml | มะนาว: ${res.lemonade_powder.toFixed(1)}g`
+      },
+      {
+        id: "velvet_creme",
+        name: "Velvet creme",
+        fullBatchYield: 325,
+        allowedContainers: ['jug_small', 'shaker', 'jug_large', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_small',
+        calc: (net) => {
+          if (net <= 0) return { toppin: 0, meiji: 0, cheesecake_syrup: 0 };
+          const rTop = 175 / 325;
+          const rMilk = 125 / 325;
+          const rCheese = 25 / 325;
+          return { toppin: net * rTop, meiji: net * rMilk, cheesecake_syrup: net * rCheese };
+        },
+        badgeFormatter: (res) => `Toppin: ${res.toppin.toFixed(1)}g | นม: ${res.meiji.toFixed(1)}ml | Cheesecake Syrup: ${res.cheesecake_syrup.toFixed(1)}ml`
+      },
+      {
+        id: "thai_tea_milk",
+        name: "ชาไทยนม (จากชาไทยเบส)",
+        fullBatchYield: 1360,
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large',
+        calc: (net) => {
+          if (net <= 0) return { creamer: 0, thai_tea_powder: 0 };
+          const brewedTeaRemaining = net * (1200 / 1360);
+          const creamerRemaining = net * (160 / 1360);
+          const teaPowderRemaining = brewedTeaRemaining * (200 / 2600);
+          return { creamer: creamerRemaining, thai_tea_powder: teaPowderRemaining };
+        },
+        badgeFormatter: (res) => `Creamer: ${res.creamer.toFixed(1)}g | ผงชาไทย: ${res.thai_tea_powder.toFixed(1)}g`
+      },
+      {
+        id: "sugar_syrup",
+        name: "Sugar Syrup",
+        fullBatchYield: 3000,
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large',
+        calc: (net) => {
+          if (net <= 0) return { sugar: 0 };
+          return { sugar: net * (1 / 3) };
+        },
+        badgeFormatter: (res) => `น้ำตาลทราย: ${res.sugar.toFixed(1)}g`
+      },
+      {
+        id: "lime_base",
+        name: "Limebase",
+        fullBatchYield: 1200,
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large',
+        calc: (net) => {
+          if (net <= 0) return { lemonade_powder: 0 };
+          return { lemonade_powder: net * (1 / 6) };
+        },
+        badgeFormatter: (res) => `Lemonade Powder: ${res.lemonade_powder.toFixed(1)}g`
+      },
+      {
+        id: "whipping_cream",
+        name: "Whipping Cream",
+        fullBatchYield: 540,
+        allowedContainers: ['jug_large', 'jug_small', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        defaultContainer: 'jug_large',
+        calc: (net) => {
+          if (net <= 0) return { toppin: 0, butterscotch: 0 };
+          const rTop = 500 / 540;
+          const rBS = 40 / 540;
+          return { toppin: net * rTop, butterscotch: net * rBS };
+        },
+        badgeFormatter: (res) => `Toppin: ${res.toppin.toFixed(1)}g | Butterscotch: ${res.butterscotch.toFixed(1)}g`
+      }
+    ];
+
+    const SYRUP_CONFIGS = [
+      { id: "vanilla", name: "Vanilla", key: "vanilla_syrup", fixedTare: null, unit: "ml" },
+      { id: "hazelnut", name: "Hazelnut", key: "hazelnut_syrup", fixedTare: null, unit: "ml" },
+      { id: "salted_caramel", name: "Salted Caramel", key: "salted_caramel_syrup", fixedTare: null, unit: "ml" },
+      { id: "young_coconut", name: "Young Coconut", key: "young_coconut_syrup", fixedTare: null, unit: "ml" },
+      { id: "cheesecake", name: "Cheesecake", key: "cheesecake_syrup", fixedTare: null, unit: "ml" },
+      { id: "brown_butter", name: "Brownbutter", key: "brownbutter_syrup", fixedTare: null, unit: "ml" },
+      { id: "calamansi", name: "Calamansi", key: "calamansi_syrup", fixedTare: 102.1, unit: "ml" },
+      { id: "tangerine", name: "Tangerine", key: "tangerine_syrup", fixedTare: 102.1, unit: "ml" },
+      { id: "grape", name: "Grape", key: "grape_syrup", fixedTare: 89.1, unit: "ml" },
+      { id: "strawberry", name: "Strawberry Syrup", key: "strawberry", fixedTare: 174.0, unit: "ml" }
+    ];
+
+    const INVENTORY_ITEMS = [
+      { id: "oat_milk", name: "Oat Milk (1 ML)", directTare: 42.1, unit: "ml", pkgCalc: (v) => v > 0 ? `${(v / 1000).toFixed(2)} กล่อง` : "-" },
+      { id: "butterscotch", name: "Butterscotch", directTare: 0, unit: "g", pkgCalc: () => "-" },
+      { id: "condensed_sweet", name: "นมข้นหวาน", directTare: 0, unit: "g", pkgCalc: (v) => v >= 505 ? `${Math.floor(v/505)} ขวด/กระป๋อง กับอีก ${(v%505).toFixed(1)}g` : (v > 0 ? `${v.toFixed(1)}g` : "-") },
+      { id: "condensed_evap", name: "นมข้นจืด", directTare: 0, unit: "g", pkgCalc: (v) => v >= 369 ? `${Math.floor(v/369)} ขวด/กระป๋อง กับอีก ${(v%369).toFixed(1)}g` : (v > 0 ? `${v.toFixed(1)}g` : "-") },
+      { id: "meiji", name: "MeijiRey (นมสด)", directTare: 75.0, unit: "ml", pkgCalc: (v) => v >= 2000 ? `${Math.floor(v/2000)} แกลลอน กับอีก ${(v%2000).toFixed(1)}ml` : (v > 0 ? `${v.toFixed(1)}ml` : "-") },
+      { id: "choc_powder", name: "Chocolate Powder (ผงช็อค)", directTare: 0, unit: "g", pkgCalc: (v) => v >= 400 ? `${Math.floor(v/400)} ถุง กับอีก ${(v%400).toFixed(1)}g` : (v > 0 ? `${v.toFixed(1)}g` : "-") },
+      { id: "vanilla_syrup", name: "Vanilla Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
+      { id: "hazelnut_syrup", name: "Hazelnut Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
+      { id: "salted_caramel_syrup", name: "Salted Caramel Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
+      { id: "creamer", name: "Non dairy Creamer (ครีมเทียม)", directTare: 0, unit: "g", pkgCalc: () => "-" },
+      { id: "lemonade_powder", name: "Lemonade Powder (ผงมะนาว)", directTare: 0, unit: "g", pkgCalc: () => "-" },
+      { id: "thai_tea_powder", name: "ผงชาไทย", directTare: 0, unit: "g", pkgCalc: () => "-" },
+      { id: "soda", name: "Soda (โซดา)", directTare: 230.0, unit: "ml", pkgCalc: () => "-" },
+      { id: "calamansi_syrup", name: "Calamansi Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
+      { id: "tangerine_syrup", name: "Tangerine Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
+      { id: "sugar", name: "Sugar (น้ำตาล)", directTare: 0, unit: "g", pkgCalc: (v) => v >= 1000 ? `${Math.floor(v/1000)} ถุง กับอีก ${(v%1000).toFixed(1)}g` : (v > 0 ? `${v.toFixed(1)}g` : "-") },
+      { id: "grape_syrup", name: "Grape Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
+      { id: "cheesecake_syrup", name: "Cheesecake Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
+      { id: "matcha_powder", name: "Matcha Powder (ผงมัจฉะ)", directTare: 0, unit: "g", pkgCalc: (v) => v >= 100 ? `${Math.floor(v/100)} ถุง กับอีก ${(v%100).toFixed(1)}g` : (v > 0 ? `${v.toFixed(1)}g` : "-") },
+      { id: "smoothie_powder", name: "Smoothie Powder", directTare: 0, unit: "g", pkgCalc: () => "-" },
+      { id: "cocoa_sauce", name: "Cocoa Sauce", directTare: 0, unit: "g", pkgCalc: () => "-" },
+      { id: "brownbutter_syrup", name: "Brownbutter Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
+      { id: "young_coconut_syrup", name: "Young Coconut Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
+      { id: "nobo_coconut_milk", name: "Nobo Coconut Milk", directTare: 47.0, unit: "ml", pkgCalc: () => "-" },
+      { id: "if_coconut_water", name: "If Coconut Water", directTare: 25.5, unit: "ml", pkgCalc: () => "-" },
+      { id: "strawberry", name: "Strawberry Syrup / Puree", directTare: 0, unit: "ml", pkgCalc: () => "-" },
+      { id: "toppin", name: "Toppin", directTare: 55.6, unit: "g", pkgCalc: (v) => v >= 907 ? `${Math.floor(v/907)} ขวด กับอีก ${(v%907).toFixed(1)}g` : (v > 0 ? `${v.toFixed(1)}g` : "-") }
+    ];
+
+    const dynamicRows = {};
+    const directInventoryInputs = {};
+
+    function initLiquidApp() {
+      initBaseCards();
+      initSyrupCards();
+      initInventoryTable();
+      calculateAll();
+    }
+
+    function initBaseCards() {
+      const container = document.getElementById('baseCardsContainer');
+      container.innerHTML = '';
+
+      BASE_CONFIGS.forEach(cfg => {
+        dynamicRows[cfg.id] = [{ id: Date.now() + Math.random(), tareKey: cfg.defaultContainer, grossWeight: 0, isReWeighed: false, initialGross: 0, usedWeight: 0 }];
+
+        const card = document.createElement('div');
+        card.className = "bg-slate-50 rounded-lg p-4 border border-slate-200 shadow-sm flex flex-col justify-between";
+        card.id = `card-base-${cfg.id}`;
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-bold text-slate-800 text-sm md:text-base">${cfg.name}</h3>
+              <div class="flex gap-1 flex-wrap justify-end">
+                ${cfg.hasLargeJugOption ? `
+                  <button onclick="addChamLargeJugRow()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded transition flex items-center gap-1 font-semibold" title="นมข้น 3 ขวด + นมข้นจืด 3 ขวด">
+                    <i class="fa-solid fa-wine-bottle"></i> +1 เหยือกใหญ่
+                  </button>
+                ` : ''}
+                <button onclick="addFullBatchRow('${cfg.id}')" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded transition flex items-center gap-1 font-semibold" title="เพิ่มเนื้อสุทธิ 1 สูตรให้อัตโนมัติ">
+                  <i class="fa-solid fa-bolt"></i> +1 สูตร
+                </button>
+                <button onclick="addBaseRow('${cfg.id}')" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-2 py-1 rounded transition flex items-center gap-1">
+                  <i class="fa-solid fa-plus"></i> เพิ่มภาชนะ
+                </button>
+              </div>
+            </div>
+            <div id="rows-base-${cfg.id}" class="space-y-2 mb-3"></div>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-200">
+            <div id="badge-base-${cfg.id}" class="text-xs font-semibold px-2.5 py-1.5 rounded badge-sub min-h-[28px] flex items-center">
+              เหลือ: 0
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+        renderBaseRows(cfg.id);
+      });
+    }
+
+    function renderBaseRows(baseId) {
+      const rowsContainer = document.getElementById(`rows-base-${baseId}`);
+      if (!rowsContainer) return;
+
+      const cfg = BASE_CONFIGS.find(c => c.id === baseId);
+      const rows = dynamicRows[baseId] || [];
+
+      rowsContainer.innerHTML = rows.map((row, idx) => {
+        const containerOptions = cfg.allowedContainers.map(cKey => {
+          const cObj = CONTAINERS[cKey];
+          return `<option value="${cKey}" ${row.tareKey === cKey ? 'selected' : ''}>${cObj.label}</option>`;
+        }).join('');
+
+        const displayWeight = row.isReWeighed ? (row.initialGross || '') : (row.grossWeight || '');
+
+        return `
+          <div class="flex flex-col gap-1 p-2 bg-white rounded border border-slate-200 shadow-xs">
+            <div class="flex items-center gap-2">
+              <select onchange="updateBaseRow('${baseId}', ${idx}, 'tareKey', this.value)" class="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:ring-1 focus:ring-amber-500 flex-1">
+                ${containerOptions}
+              </select>
+              <input type="number" value="${displayWeight}" placeholder="${row.isReWeighed ? 'ค่าน้ำหนักเดิม' : '0'}" min="0" 
+                oninput="updateBaseRow('${baseId}', ${idx}, '${row.isReWeighed ? 'initialGross' : 'grossWeight'}', this.value)"
+                class="w-20 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-amber-500 bg-white" />
+              <span class="text-xs text-slate-500">g</span>
+              ${rows.length > 1 ? `
+                <button onclick="removeBaseRow('${baseId}', ${idx})" class="text-slate-400 hover:text-red-500 text-sm px-1">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              ` : '<span class="w-4"></span>'}
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
+              <button onclick="toggleReWeighMode('${baseId}', ${idx})" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+                <i class="fa-solid ${row.isReWeighed ? 'fa-square-check text-emerald-600' : 'fa-scale-unbalanced'}"></i>
+                ${row.isReWeighed ? 'โหมด: ชั่งใหม่หลังใช้' : '+ชั่งใหม่หลังใช้'}
+              </button>
+              
+              ${row.isReWeighed ? `
+                <div class="flex items-center gap-1">
+                  <span class="text-slate-500">ชั่งใหม่ได้:</span>
+                  <input type="number" value="${row.usedWeight || ''}" placeholder="0" min="0" 
+                    oninput="updateBaseRow('${baseId}', ${idx}, 'usedWeight', this.value)"
+                    class="w-16 text-xs border border-amber-300 bg-amber-50 rounded px-1.5 py-0.5 text-right font-mono focus:ring-1 focus:ring-amber-500" />
+                  <span class="text-slate-500">g</span>
                 </div>
-                <button class="btn-remove" onclick="removePieceInput(this, '${itemId}')">✕</button>
-            `;
-            container.appendChild(row);
-            updateCalculations(itemId);
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleReWeighMode(baseId, idx) {
+      const row = dynamicRows[baseId][idx];
+      row.isReWeighed = !row.isReWeighed;
+      if (row.isReWeighed && !row.initialGross) {
+        row.initialGross = row.grossWeight || 0;
+      } else if (!row.isReWeighed) {
+        row.grossWeight = row.initialGross || row.grossWeight;
+        row.usedWeight = 0;
+      }
+      renderBaseRows(baseId);
+      calculateAll();
+    }
+
+    function addBaseRow(baseId) {
+      const cfg = BASE_CONFIGS.find(c => c.id === baseId);
+      dynamicRows[baseId].push({ id: Date.now() + Math.random(), tareKey: cfg.defaultContainer, grossWeight: 0, isReWeighed: false, initialGross: 0, usedWeight: 0 });
+      renderBaseRows(baseId);
+      calculateAll();
+    }
+
+    function addFullBatchRow(baseId) {
+      const cfg = BASE_CONFIGS.find(c => c.id === baseId);
+      dynamicRows[baseId].push({ id: Date.now() + Math.random(), tareKey: 'none', grossWeight: cfg.fullBatchYield, isReWeighed: false, initialGross: 0, usedWeight: 0 });
+      renderBaseRows(baseId);
+      calculateAll();
+    }
+
+    // Special Option for Cham: 3 Condensed Sweet (1515g) + 3 Condensed Evap (1107g) = 2622g yield
+    function addChamLargeJugRow() {
+      const chamLargeJugYield = (505 * 3) + (369 * 3); // 2622g
+      dynamicRows['cham'].push({ id: Date.now() + Math.random(), tareKey: 'jug_large', grossWeight: chamLargeJugYield + CONTAINERS.jug_large.val, isReWeighed: false, initialGross: 0, usedWeight: 0 });
+      renderBaseRows('cham');
+      calculateAll();
+    }
+
+    function removeBaseRow(baseId, idx) {
+      dynamicRows[baseId].splice(idx, 1);
+      renderBaseRows(baseId);
+      calculateAll();
+    }
+
+    function updateBaseRow(baseId, idx, field, value) {
+      const valNum = parseFloat(value) || 0;
+      dynamicRows[baseId][idx][field] = valNum;
+      
+      const r = dynamicRows[baseId][idx];
+      if (field === 'initialGross') {
+        if (!r.isReWeighed) {
+          r.grossWeight = valNum;
+        }
+      }
+      calculateAll();
+    }
+
+    function initSyrupCards() {
+      const container = document.getElementById('syrupCardsContainer');
+      container.innerHTML = '';
+
+      SYRUP_CONFIGS.forEach(cfg => {
+        dynamicRows[cfg.id] = [{ id: Date.now() + Math.random(), tareKey: 'monin_empty', grossWeight: 0, isReWeighed: false, initialGross: 0, usedWeight: 0 }];
+
+        const card = document.createElement('div');
+        card.className = "bg-slate-50 rounded-lg p-4 border border-slate-200 shadow-sm flex flex-col justify-between";
+        card.id = `card-syrup-${cfg.id}`;
+
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-bold text-slate-800 text-sm md:text-base">${cfg.name}</h3>
+              ${cfg.fixedTare === null ? `
+                <button onclick="addSyrupRow('${cfg.id}')" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded transition flex items-center gap-1">
+                  <i class="fa-solid fa-plus"></i> เพิ่มขวด
+                </button>
+              ` : ''}
+            </div>
+            <div id="rows-syrup-${cfg.id}" class="space-y-2 mb-3"></div>
+          </div>
+          <div class="mt-2 pt-2 border-t border-slate-200">
+            <div id="badge-syrup-${cfg.id}" class="text-xs font-semibold px-2.5 py-1.5 rounded badge-sub min-h-[28px] flex items-center">
+              เนื้อไซรัปเหลือ: 0ml
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+        renderSyrupRows(cfg.id);
+      });
+    }
+
+    function renderSyrupRows(syrupId) {
+      const rowsContainer = document.getElementById(`rows-syrup-${syrupId}`);
+      if (!rowsContainer) return;
+
+      const cfg = SYRUP_CONFIGS.find(s => s.id === syrupId);
+      const rows = dynamicRows[syrupId] || [];
+
+      if (cfg.fixedTare !== null) {
+        const row = rows[0] || { grossWeight: 0 };
+        const displayWeight = row.isReWeighed ? (row.initialGross || '') : (row.grossWeight || '');
+
+        rowsContainer.innerHTML = `
+          <div class="flex flex-col gap-1 p-2 bg-white rounded border border-slate-200 shadow-xs">
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-600 flex-1">ภาชนะตายตัว (-${cfg.fixedTare}g)</span>
+              <input type="number" value="${displayWeight}" placeholder="${row.isReWeighed ? 'ค่าน้ำหนักเดิม' : '0'}" min="0" 
+                oninput="updateSyrupRow('${syrupId}', 0, '${row.isReWeighed ? 'initialGross' : 'grossWeight'}', this.value)"
+                class="w-24 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-indigo-500 bg-white" />
+              <span class="text-xs text-slate-500">g</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
+              <button onclick="toggleSyrupReWeighMode('${syrupId}', 0)" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+                <i class="fa-solid ${row.isReWeighed ? 'fa-square-check text-emerald-600' : 'fa-scale-unbalanced'}"></i>
+                ${row.isReWeighed ? 'โหมด: ชั่งใหม่หลังใช้' : '+ชั่งใหม่หลังใช้'}
+              </button>
+              ${row.isReWeighed ? `
+                <div class="flex items-center gap-1">
+                  <span class="text-slate-500">ชั่งใหม่ได้:</span>
+                  <input type="number" value="${row.usedWeight || ''}" placeholder="0" min="0" 
+                    oninput="updateSyrupRow('${syrupId}', 0, 'usedWeight', this.value)"
+                    class="w-16 text-xs border border-amber-300 bg-amber-50 rounded px-1.5 py-0.5 text-right font-mono focus:ring-1 focus:ring-indigo-500" />
+                  <span class="text-slate-500">g</span>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const containerOptionsHTML = `
+        <option value="monin_empty">${CONTAINERS.monin_empty.label}</option>
+        <option value="monin_pump">${CONTAINERS.monin_pump.label}</option>
+        <option value="lb_empty">${CONTAINERS.lb_empty.label}</option>
+        <option value="lb_pump">${CONTAINERS.lb_pump.label}</option>
+        <option value="none">${CONTAINERS.none.label}</option>
+      `;
+
+      rowsContainer.innerHTML = rows.map((row, idx) => {
+        const displayWeight = row.isReWeighed ? (row.initialGross || '') : (row.grossWeight || '');
+        return `
+          <div class="flex flex-col gap-1 p-2 bg-white rounded border border-slate-200 shadow-xs">
+            <div class="flex items-center gap-2">
+              <select onchange="updateSyrupRow('${syrupId}', ${idx}, 'tareKey', this.value)" class="text-xs border border-slate-300 rounded px-2 py-1.5 bg-white focus:ring-1 focus:ring-indigo-500 flex-1">
+                ${containerOptionsHTML}
+              </select>
+              <input type="number" value="${displayWeight}" placeholder="${row.isReWeighed ? 'ค่าน้ำหนักเดิม' : '0'}" min="0" 
+                oninput="updateSyrupRow('${syrupId}', ${idx}, '${row.isReWeighed ? 'initialGross' : 'grossWeight'}', this.value)"
+                class="w-20 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-indigo-500 bg-white" />
+              <span class="text-xs text-slate-500">g</span>
+              ${rows.length > 1 ? `
+                <button onclick="removeSyrupRow('${syrupId}', ${idx})" class="text-slate-400 hover:text-red-500 text-sm px-1">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              ` : '<span class="w-4"></span>'}
+            </div>
+            <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
+              <button onclick="toggleSyrupReWeighMode('${syrupId}', ${idx})" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+                <i class="fa-solid ${row.isReWeighed ? 'fa-square-check text-emerald-600' : 'fa-scale-unbalanced'}"></i>
+                ${row.isReWeighed ? 'โหมด: ชั่งใหม่หลังใช้' : '+ชั่งใหม่หลังใช้'}
+              </button>
+              ${row.isReWeighed ? `
+                <div class="flex items-center gap-1">
+                  <span class="text-slate-500">ชั่งใหม่ได้:</span>
+                  <input type="number" value="${row.usedWeight || ''}" placeholder="0" min="0" 
+                    oninput="updateSyrupRow('${syrupId}', ${idx}, 'usedWeight', this.value)"
+                    class="w-16 text-xs border border-amber-300 bg-amber-50 rounded px-1.5 py-0.5 text-right font-mono focus:ring-1 focus:ring-indigo-500" />
+                  <span class="text-slate-500">g</span>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      rows.forEach((row, idx) => {
+        const selects = rowsContainer.querySelectorAll('select');
+        if (selects[idx] && row.tareKey) {
+          selects[idx].value = row.tareKey;
+        }
+      });
+    }
+
+    function toggleSyrupReWeighMode(syrupId, idx) {
+      const row = dynamicRows[syrupId][idx];
+      row.isReWeighed = !row.isReWeighed;
+      if (row.isReWeighed && !row.initialGross) {
+        row.initialGross = row.grossWeight || 0;
+      } else if (!row.isReWeighed) {
+        row.grossWeight = row.initialGross || row.grossWeight;
+        row.usedWeight = 0;
+      }
+      renderSyrupRows(syrupId);
+      calculateAll();
+    }
+
+    function addSyrupRow(syrupId) {
+      dynamicRows[syrupId].push({ id: Date.now() + Math.random(), tareKey: 'monin_empty', grossWeight: 0, isReWeighed: false, initialGross: 0, usedWeight: 0 });
+      renderSyrupRows(syrupId);
+      calculateAll();
+    }
+
+    function removeSyrupRow(syrupId, idx) {
+      dynamicRows[syrupId].splice(idx, 1);
+      renderSyrupRows(syrupId);
+      calculateAll();
+    }
+
+    function updateSyrupRow(syrupId, idx, field, value) {
+      const valNum = parseFloat(value) || 0;
+      if (field === 'tareKey') {
+        dynamicRows[syrupId][idx].tareKey = value;
+      } else {
+        dynamicRows[syrupId][idx][field] = valNum;
+      }
+
+      const r = dynamicRows[syrupId][idx];
+      if (field === 'initialGross') {
+        if (!r.isReWeighed) {
+          r.grossWeight = valNum;
+        }
+      }
+      calculateAll();
+    }
+
+    function initInventoryTable() {
+      const tbody = document.getElementById('inventoryTableBody');
+      tbody.innerHTML = '';
+
+      INVENTORY_ITEMS.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-medium text-slate-800">${item.name}</td>
+          <td class="py-3 px-4">
+            <div class="flex items-center gap-1">
+              <input type="number" id="input-direct-${item.id}" value="" placeholder="0" min="0" oninput="updateDirectInput('${item.id}', this.value)"
+                class="w-24 text-xs border border-slate-300 rounded px-2 py-1.5 text-right font-mono focus:ring-1 focus:ring-emerald-500 bg-white" />
+              <span class="text-xs text-slate-400">${item.unit}</span>
+              ${item.directTare > 0 ? `<span class="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">-${item.directTare}</span>` : ''}
+            </div>
+          </td>
+          <td class="py-3 px-4 font-mono text-xs text-slate-600" id="calc-from-base-${item.id}">0.0 ${item.unit}</td>
+          <td class="py-3 px-4 font-mono font-bold text-emerald-700" id="calc-total-${item.id}">0.0 ${item.unit}</td>
+          <td class="py-3 px-4 text-xs font-semibold text-slate-700" id="calc-pkg-${item.id}">-</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateDirectInput(itemId, value) {
+      directInventoryInputs[itemId] = parseFloat(value) || 0;
+      calculateAll();
+    }
+
+    function calculateAll() {
+      const calculatedSums = {};
+      INVENTORY_ITEMS.forEach(i => calculatedSums[i.id] = 0);
+
+      BASE_CONFIGS.forEach(cfg => {
+        const rows = dynamicRows[cfg.id] || [];
+        let totalNetInBaseCard = 0;
+
+        rows.forEach(r => {
+          const tare = CONTAINERS[r.tareKey] ? CONTAINERS[r.tareKey].val : 0;
+          let effectiveGross = r.grossWeight || 0;
+
+          if (r.isReWeighed) {
+            const initial = r.initialGross || 0;
+            const used = r.usedWeight || 0;
+            effectiveGross = Math.max(0, initial - used);
+          }
+
+          const net = Math.max(0, effectiveGross - tare);
+          totalNetInBaseCard += net;
+        });
+
+        const recipeResult = cfg.calc(totalNetInBaseCard);
+
+        const badge = document.getElementById(`badge-base-${cfg.id}`);
+        if (badge) {
+          badge.innerText = cfg.badgeFormatter(recipeResult);
         }
 
-        function removePieceInput(btn, itemId) {
-            btn.parentElement.remove();
-            updateCalculations(itemId);
+        Object.keys(recipeResult).forEach(matKey => {
+          if (calculatedSums[matKey] !== undefined) {
+            calculatedSums[matKey] += recipeResult[matKey];
+          }
+        });
+      });
+
+      SYRUP_CONFIGS.forEach(cfg => {
+        const rows = dynamicRows[cfg.id] || [];
+        let totalNetSyrup = 0;
+
+        rows.forEach(r => {
+          let tare = 0;
+          if (cfg.fixedTare !== null) {
+            tare = cfg.fixedTare;
+          } else if (CONTAINERS[r.tareKey]) {
+            tare = CONTAINERS[r.tareKey].val;
+          }
+
+          let effectiveGross = r.grossWeight || 0;
+          if (r.isReWeighed) {
+            const initial = r.initialGross || 0;
+            const used = r.usedWeight || 0;
+            effectiveGross = Math.max(0, initial - used);
+          }
+
+          const net = Math.max(0, effectiveGross - tare);
+          totalNetSyrup += net;
+        });
+
+        const badge = document.getElementById(`badge-syrup-${cfg.id}`);
+        if (badge) {
+          badge.innerText = `เนื้อเหลือสุทธิ: ${totalNetSyrup.toFixed(1)} ${cfg.unit}`;
         }
 
-        function updateCalculations(itemId) {
-            const item = itemsData.find(i => i.id === itemId);
-            let total = 0;
-
-            if (item.packSize > 0) {
-                const packInput = document.getElementById(`pack_${itemId}`);
-                const packVal = parseFloat(packInput.value) || 0;
-                total += packVal * item.packSize;
-            }
-
-            const pieceInputs = document.querySelectorAll(`.piece-input-${itemId}`);
-            pieceInputs.forEach(input => {
-                total += parseFloat(input.value) || 0;
-            });
-
-            document.getElementById(`total_${itemId}`).innerText = `${total.toLocaleString()} ${item.unit}`;
+        if (calculatedSums[cfg.key] !== undefined) {
+          calculatedSums[cfg.key] += totalNetSyrup;
         }
+      });
 
-        function getItemState(itemId) {
-            const item = itemsData.find(i => i.id === itemId);
-            let packs = 0;
-            if (item.packSize > 0) {
-                const packInput = document.getElementById(`pack_${itemId}`);
-                packs = parseFloat(packInput.value) || 0;
-            }
-            const pieces = [];
-            document.querySelectorAll(`.piece-input-${itemId}`).forEach(input => {
-                pieces.push(parseFloat(input.value) || 0);
-            });
-            return { packs, pieces };
+      const activeItemsForSummary = [];
+
+      INVENTORY_ITEMS.forEach(item => {
+        const directGross = directInventoryInputs[item.id] || 0;
+        const directNet = directGross > 0 ? Math.max(0, directGross - item.directTare) : 0;
+        const fromBase = calculatedSums[item.id] || 0;
+        const totalNet = directNet + fromBase;
+
+        const fromBaseTd = document.getElementById(`calc-from-base-${item.id}`);
+        const totalTd = document.getElementById(`calc-total-${item.id}`);
+        const pkgTd = document.getElementById(`calc-pkg-${item.id}`);
+
+        if (fromBaseTd) fromBaseTd.innerText = `${fromBase.toFixed(1)} ${item.unit}`;
+        if (totalTd) totalTd.innerText = `${totalNet.toFixed(1)} ${item.unit}`;
+
+        const pkgText = item.pkgCalc(totalNet);
+        if (pkgTd) pkgTd.innerText = pkgText;
+
+        if (totalNet > 0) {
+          activeItemsForSummary.push({
+            name: item.name,
+            total: totalNet.toFixed(1),
+            unit: item.unit
+          });
         }
+      });
 
-        function setItemState(itemId, state) {
-            const item = itemsData.find(i => i.id === itemId);
-            if (item.packSize > 0) {
-                const packInput = document.getElementById(`pack_${itemId}`);
-                packInput.value = state.packs || '';
-            }
+      renderBottomSummary(activeItemsForSummary);
+    }
 
-            const container = document.getElementById(`pieces_container_${itemId}`);
-            container.innerHTML = '';
+    function renderBottomSummary(activeItems) {
+      const container = document.getElementById('bottomSummaryGrid');
+      if (!container) return;
+
+      if (activeItems.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-8 text-center text-slate-400 italic bg-slate-800/50 rounded-lg border border-slate-700/50">
+            <i class="fa-solid fa-circle-info text-xl mb-1 block"></i>
+            ยังไม่มีรายการวัตถุดิบ (กรอกตัวเลขด้านบนเพื่อแสดงผลสรุป)
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = activeItems.map(item => `
+        <div class="bg-slate-800/80 rounded-lg p-3 border border-slate-700 flex justify-between items-center hover:border-amber-500/50 transition">
+          <span class="font-bold text-slate-100 text-sm">${item.name}</span>
+          <span class="text-sm font-mono text-amber-400 font-bold bg-amber-400/10 px-2.5 py-1 rounded border border-amber-400/20">
+            เหลือ ${item.total} ${item.unit}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    function generateCleanSummaryText() {
+      let text = "📋 === สรุปวัตถุดิบที่เหลือ ===\n\n";
+      let count = 0;
+
+      INVENTORY_ITEMS.forEach(item => {
+        const directGross = directInventoryInputs[item.id] || 0;
+        const directNet = directGross > 0 ? Math.max(0, directGross - item.directTare) : 0;
+        const fromBase = getBaseSumForItem(item.id);
+        const totalNet = directNet + fromBase;
+
+        if (totalNet > 0) {
+          count++;
+          text += `${item.name} เหลือ ${totalNet.toFixed(1)} ${item.unit}\n`;
+        }
+      });
+
+      if (count === 0) {
+        text += "ไม่มีรายการวัตถุดิบที่เหลือ";
+      }
+
+      return text;
+    }
+
+    function getBaseSumForItem(itemId) {
+      let sum = 0;
+      BASE_CONFIGS.forEach(cfg => {
+        const rows = dynamicRows[cfg.id] || [];
+        let totalNet = 0;
+        rows.forEach(r => {
+          const tare = CONTAINERS[r.tareKey] ? CONTAINERS[r.tareKey].val : 0;
+          let effectiveGross = r.grossWeight || 0;
+          if (r.isReWeighed) {
+            effectiveGross = Math.max(0, (r.initialGross || 0) - (r.usedWeight || 0));
+          }
+          totalNet += Math.max(0, effectiveGross - tare);
+        });
+        const res = cfg.calc(totalNet);
+        if (res[itemId]) sum += res[itemId];
+      });
+
+      SYRUP_CONFIGS.forEach(cfg => {
+        if (cfg.key === itemId) {
+          const rows = dynamicRows[cfg.id] || [];
+          rows.forEach(r => {
+            let tare = 0;
+            if (cfg.fixedTare !== null) tare = cfg.fixedTare;
+            else if (CONTAINERS[r.tareKey]) tare = CONTAINERS[r.tareKey].val;
             
-            const pieces = (state.pieces && state.pieces.length > 0) ? state.pieces : [0];
-            pieces.forEach((val, idx) => {
-                const row = document.createElement('div');
-                row.className = 'piece-row';
-                row.innerHTML = `
-                    <div class="input-group" style="flex:1; margin:0;">
-                        <label>${idx === 0 ? (item.packSize > 0 ? 'เศษ/ชิ้น:' : 'จำนวน:') : 'เพิ่ม:'}</label>
-                        <input type="number" class="piece-input-${itemId}" min="0" value="${val || ''}" placeholder="0" oninput="updateCalculations('${itemId}')">
-                    </div>
-                    ${idx > 0 ? `<button class="btn-remove" onclick="removePieceInput(this, '${itemId}')">✕</button>` : ''}
-                `;
-                container.appendChild(row);
-            });
-            updateCalculations(itemId);
-        }
-
-        function copyItemData(itemId) {
-            clipboardState = getItemState(itemId);
-            alert('คัดลอกข้อมูลรายการนี้แล้ว');
-        }
-
-        function pasteItemData(itemId) {
-            if (!clipboardState) {
-                alert('ยังไม่มีข้อมูลที่คัดลอกไว้');
-                return;
+            let effectiveGross = r.grossWeight || 0;
+            if (r.isReWeighed) {
+              effectiveGross = Math.max(0, (r.initialGross || 0) - (r.usedWeight || 0));
             }
-            setItemState(itemId, clipboardState);
+            sum += Math.max(0, effectiveGross - tare);
+          });
         }
+      });
+      return sum;
+    }
 
-        function filterItems() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            itemsData.forEach(item => {
-                const card = document.getElementById(`card_${item.id}`);
-                if (item.name.toLowerCase().includes(query)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
+    function openModalSummary() {
+      document.getElementById('summaryTextOutput').innerText = generateCleanSummaryText();
+      document.getElementById('summaryModal').classList.remove('hidden');
+    }
 
-        function generateSummary() {
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-            const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+    function closeModalSummary() {
+      document.getElementById('summaryModal').classList.add('hidden');
+    }
 
-            let text = `📋 สรุปรายการนับสต็อกคาเฟ่\n📅 วันที่: ${dateStr} เวลา ${timeStr}\n----------------------------------\n`;
-            let countedCount = 0;
+    function copyModalSummaryText() {
+      const text = document.getElementById('summaryTextOutput').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("คัดลอกสรุปรายการวัตถุดิบเรียบร้อยแล้ว!");
+      });
+    }
 
-            itemsData.forEach(item => {
-                const state = getItemState(itemId = item.id);
-                let packVal = state.packs;
-                let pieceSum = state.pieces.reduce((a, b) => a + b, 0);
-                let total = (packVal * item.packSize) + pieceSum;
+    function copyActiveSummaryText() {
+      const text = generateCleanSummaryText();
+      navigator.clipboard.writeText(text).then(() => {
+        alert("คัดลอกสรุปรายการวัตถุดิบเรียบร้อยแล้ว!");
+      });
+    }
 
-                if (total > 0) {
-                    countedCount++;
-                    let detail = [];
-                    if (packVal > 0) detail.push(`${packVal} แพ็ค`);
-                    if (pieceSum > 0) detail.push(`เศษ ${pieceSum} ${item.unit}`);
-                    
-                    let detailStr = detail.length > 0 ? ` (${detail.join(' + ')})` : '';
-                    text += `▫️ ${item.name}: ${total.toLocaleString()} ${item.unit}${detailStr}\n`;
-                }
-            });
+    function resetAllInputs() {
+      if (confirm("คุณต้องการรีเซ็ตค่าทั้งหมดเป็น 0 ใช่หรือไม่?")) {
+        initBaseCards();
+        initSyrupCards();
+        Object.keys(directInventoryInputs).forEach(k => directInventoryInputs[k] = 0);
+        initInventoryTable();
+        calculateAll();
+      }
+    }
 
-            text += `----------------------------------\nรวมทั้งหมด ${countedCount} รายการ`;
-
-            document.getElementById('modalTitle').innerText = 'สรุปรายการนับสต็อก';
-            document.getElementById('modalText').innerText = text;
-            document.getElementById('modalText').style.display = 'block';
-            document.getElementById('modalTextarea').style.display = 'none';
-            document.getElementById('modalActionBtn').innerText = 'คัดลอกข้อความ';
-            document.getElementById('modalActionBtn').onclick = () => {
-                navigator.clipboard.writeText(text);
-                alert('คัดลอกข้อความสรุปแล้ว!');
-            };
-            document.getElementById('textModal').style.display = 'flex';
-        }
-
-        function openCopyModal() {
-            const fullData = {};
-            itemsData.forEach(item => {
-                fullData[item.id] = getItemState(item.id);
-            });
-            const encoded = btoa(JSON.stringify(fullData));
-
-            document.getElementById('modalTitle').innerText = 'รหัสคัดลอกสต็อกทั้งหมด';
-            document.getElementById('modalText').innerText = encoded;
-            document.getElementById('modalText').style.display = 'block';
-            document.getElementById('modalTextarea').style.display = 'none';
-            document.getElementById('modalActionBtn').innerText = 'คัดลอกรหัส';
-            document.getElementById('modalActionBtn').onclick = () => {
-                navigator.clipboard.writeText(encoded);
-                alert('คัดลอกรหัสสต็อกเรียบร้อยแล้ว!');
-            };
-            document.getElementById('textModal').style.display = 'flex';
-        }
-
-        function openPasteModal() {
-            document.getElementById('modalTitle').innerText = 'นำเข้าข้อมูลสต็อก';
-            document.getElementById('modalText').style.display = 'none';
-            document.getElementById('modalTextarea').style.display = 'block';
-            document.getElementById('modalTextarea').value = '';
-            document.getElementById('modalActionBtn').innerText = 'นำเข้าข้อมูล';
-            document.getElementById('modalActionBtn').onclick = () => {
-                const code = document.getElementById('modalTextarea').value.trim();
-                if (!code) return;
-                try {
-                    const data = JSON.parse(atob(code));
-                    itemsData.forEach(item => {
-                        if (data[item.id]) {
-                            setItemState(item.id, data[item.id]);
-                        }
-                    });
-                    alert('นำเข้าข้อมูลสำเร็จ!');
-                    closeModal();
-                } catch (e) {
-                    alert('รหัสไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง');
-                }
-            };
-            document.getElementById('textModal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('textModal').style.display = 'none';
-        }
-
-        window.onload = initApp;
-    </script>
+    window.onload = () => {
+      initDryApp();
+      initLiquidApp();
+    };
+  </script>
 </body>
 </html>
