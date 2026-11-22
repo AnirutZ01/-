@@ -177,6 +177,28 @@
     .btn-summary { background: var(--accent); color: white; }
     .btn-copy-all { background: var(--accent-light); color: var(--accent); }
     .btn-paste-all { background: #e3f2fd; color: #1565c0; }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
   </style>
 </head>
 <body class="pb-28">
@@ -244,7 +266,7 @@
       <div class="bg-amber-800 text-white px-6 py-4 flex justify-between items-center">
         <div>
           <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-flask"></i> 1. หมวดเตรียม Base & สูตรเครื่องดื่ม</h2>
-          <p class="text-xs text-amber-100 mt-0.5">กรอกน้ำหนักรวม หรือกด '+1 สูตร' เพื่อคำนวณอัตโนมัติ</p>
+          <p class="text-xs text-amber-100 mt-0.5">กรอกน้ำหนักรวม หรือกด '+1 สูตร' / '+1 เหยือกใหญ่' เพื่อคำนวณอัตโนมัติ</p>
         </div>
       </div>
       <div class="p-6">
@@ -651,6 +673,7 @@
       jug_small: { label: "เหยือกเล็ก [121.3g]", val: 121.3 },
       jug_large: { label: "เหยือกใหญ่ [359g]", val: 359 },
       squeeze_small: { label: "ขวดบีบ [72g]", val: 72 },
+      squeeze_smt: { label: "ขวดบีบ (SMT) [77.6g]", val: 77.6 },
       squeeze_large: { label: "ขวดบีบใหญ่ [100g]", val: 100 },
       milk_gallon: { label: "แกลลอนนม [68.2g]", val: 68.2 },
       monin_empty: { label: "ขวด Monin เปล่า [462.3g]", val: 462.3 },
@@ -662,19 +685,19 @@
       bs_squeeze: { label: "butter scotch (ขวดบีบ) [25.5g]", val: 25.5 }
     };
 
+    const BASE_ALLOWED_CONTAINERS = ['shaker', 'jug_small', 'jug_large', 'milk_gallon', 'squeeze_small', 'squeeze_smt', 'squeeze_large', 'none'];
+
     const BASE_CONFIGS = [
       {
         id: "cham",
         name: "Cham",
         fullBatchYield: 874,
-        allowedContainers: ['shaker', 'jug_small', 'jug_large', 'milk_gallon', 'squeeze_small', 'squeeze_large', 'none'],
+        largeJugYield: (505 * 3) + (369 * 3), // 2622
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
         defaultContainer: 'jug_small',
-        hasLargeJugOption: true,
         calc: (net) => {
           if (net <= 0) return { condensed_sweet: 0, condensed_evap: 0 };
-          const ratioSweet = 505 / 874;
-          const ratioEvap = 369 / 874;
-          return { condensed_sweet: net * ratioSweet, condensed_evap: net * ratioEvap };
+          return { condensed_sweet: net * (505 / 874), condensed_evap: net * (369 / 874) };
         },
         badgeFormatter: (res) => `ข้นหวาน: ${res.condensed_sweet.toFixed(1)}g | ข้นจืด: ${res.condensed_evap.toFixed(1)}g`
       },
@@ -682,7 +705,7 @@
         id: "choc",
         name: "ช็อค (Chocolate)",
         fullBatchYield: 1000,
-        allowedContainers: ['squeeze_small', 'squeeze_large', 'jug_large', 'milk_gallon', 'shaker', 'jug_small', 'none'],
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
         defaultContainer: 'squeeze_small',
         calc: (net) => {
           if (net <= 0) return { choc_powder: 0 };
@@ -691,10 +714,42 @@
         badgeFormatter: (res) => `ผงช็อคเหลือ: ${res.choc_powder.toFixed(1)}g`
       },
       {
+        id: "choc_creme",
+        name: "Chocolate Crème",
+        fullBatchYield: 300, // Toppin 100 + นม 150 + Choc powder 50
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
+        defaultContainer: 'jug_small',
+        calc: (net) => {
+          if (net <= 0) return { toppin: 0, meiji: 0, choc_powder: 0 };
+          return {
+            toppin: net * (100 / 300),
+            meiji: net * (150 / 300),
+            choc_powder: net * (50 / 300)
+          };
+        },
+        badgeFormatter: (res) => `Toppin: ${res.toppin.toFixed(1)}g | นม: ${res.meiji.toFixed(1)}ml | ผงช็อค: ${res.choc_powder.toFixed(1)}g`
+      },
+      {
+        id: "white_choc_base",
+        name: "White Chocolate Base",
+        subLabel: "(นับตาม Quarter batch หรือสูตรเล็กสุด)",
+        fullBatchYield: 570, // นม 450 ml + White choc 120 g
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
+        defaultContainer: 'jug_small',
+        calc: (net) => {
+          if (net <= 0) return { meiji: 0, white_chocolate: 0 };
+          return {
+            meiji: net * (450 / 570),
+            white_chocolate: net * (120 / 570)
+          };
+        },
+        badgeFormatter: (res) => `นม: ${res.meiji.toFixed(1)}ml | White Chocolate: ${res.white_chocolate.toFixed(1)}g`
+      },
+      {
         id: "matcha",
         name: "มัจฉะ (Matcha)",
         fullBatchYield: 1600,
-        allowedContainers: ['jug_large', 'jug_small', 'milk_gallon', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
         defaultContainer: 'jug_large',
         calc: (net) => {
           if (net <= 0) return { matcha_powder: 0 };
@@ -706,30 +761,35 @@
         id: "matcha_creme",
         name: "มัจฉะครีม",
         fullBatchYield: 310,
-        allowedContainers: ['jug_small', 'milk_gallon', 'shaker', 'jug_large', 'squeeze_small', 'squeeze_large', 'none'],
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
         defaultContainer: 'jug_small',
         calc: (net) => {
           if (net <= 0) return { meiji: 0, toppin: 0, matcha_powder: 0 };
-          const rMilk = 200 / 310;
-          const rTop = 100 / 310;
-          const rPowder = 10 / 310;
-          return { meiji: net * rMilk, toppin: net * rTop, matcha_powder: net * rPowder };
+          return {
+            meiji: net * (200 / 310),
+            toppin: net * (100 / 310),
+            matcha_powder: net * (10 / 310)
+          };
         },
         badgeFormatter: (res) => `นม: ${res.meiji.toFixed(1)}ml | Toppin: ${res.toppin.toFixed(1)}g | มัจฉะ: ${res.matcha_powder.toFixed(1)}g`
       },
       {
         id: "butter_creme",
         name: "บัตเตอร์ครีม",
-        fullBatchYield: 400,
-        allowedContainers: ['jug_large', 'jug_small', 'milk_gallon', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        fullBatchYield: 400, // Espresso 50 + Toppin 175 + Milk 175
+        largeJugYield: 1560, // Toppin 700 + นม 500 + Butterscotch 160 + Espresso 200
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
         defaultContainer: 'jug_large',
         calc: (net) => {
-          if (net <= 0) return { meiji: 0, toppin: 0 };
-          const rTop = 175 / 400;
-          const rMilk = 175 / 400;
-          return { meiji: net * rMilk, toppin: net * rTop };
+          if (net <= 0) return { meiji: 0, toppin: 0, butterscotch: 0 };
+          // สัดส่วนตามสูตรใหญ่: Toppin 700/1560, นม 500/1560, Butterscotch 160/1560 (Espresso 200/1560)
+          return {
+            toppin: net * (700 / 1560),
+            meiji: net * (500 / 1560),
+            butterscotch: net * (160 / 1560)
+          };
         },
-        badgeFormatter: (res) => `นม: ${res.meiji.toFixed(1)}ml | Toppin: ${res.toppin.toFixed(1)}g`
+        badgeFormatter: (res) => `Toppin: ${res.toppin.toFixed(1)}g | นม: ${res.meiji.toFixed(1)}ml | Butterscotch: ${res.butterscotch.toFixed(1)}g`
       },
       {
         id: "butterscotch_squeeze",
@@ -753,15 +813,18 @@
         id: "strawberry_creme",
         name: "สตรอว์เบอร์รี่ครีม",
         fullBatchYield: 232.5,
-        allowedContainers: ['jug_large', 'jug_small', 'milk_gallon', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        largeJugYield: 1665, // นม 600 + Toppin 600 + Strawberry Puree 360 + Lime 105
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
         defaultContainer: 'jug_large',
         calc: (net) => {
           if (net <= 0) return { toppin: 0, meiji: 0, strawberry: 0, lemonade_powder: 0 };
-          const rTop = 100 / 232.5;
-          const rMilk = 100 / 232.5;
-          const rStraw = 15 / 232.5;
-          const rLime = 17.5 / 232.5;
-          return { toppin: net * rTop, meiji: net * rMilk, strawberry: net * rStraw, lemonade_powder: net * rLime };
+          // สัดส่วนตามสูตรเหยือกใหญ่: Toppin 600/1665, นม 600/1665, Strawberry Puree 360/1665, Lime 105/1665
+          return {
+            toppin: net * (600 / 1665),
+            meiji: net * (600 / 1665),
+            strawberry: net * (360 / 1665),
+            lemonade_powder: net * (105 / 1665)
+          };
         },
         badgeFormatter: (res) => `Toppin: ${res.toppin.toFixed(1)}g | นม: ${res.meiji.toFixed(1)}ml | สตรอว์เบอร์รี่: ${res.strawberry.toFixed(1)}ml | มะนาว: ${res.lemonade_powder.toFixed(1)}g`
       },
@@ -769,14 +832,17 @@
         id: "velvet_creme",
         name: "Velvet creme",
         fullBatchYield: 325,
-        allowedContainers: ['jug_small', 'milk_gallon', 'shaker', 'jug_large', 'squeeze_small', 'squeeze_large', 'none'],
+        largeJugYield: 1300, // Toppin 700 + นม 500 + Cheesecake syrup 100
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
         defaultContainer: 'jug_small',
         calc: (net) => {
           if (net <= 0) return { toppin: 0, meiji: 0, cheesecake_syrup: 0 };
-          const rTop = 175 / 325;
-          const rMilk = 125 / 325;
-          const rCheese = 25 / 325;
-          return { toppin: net * rTop, meiji: net * rMilk, cheesecake_syrup: net * rCheese };
+          // สัดส่วนตรงกันทั้งสูตรเล็ก (175:125:25 = 325) และสูตรเหยือกใหญ่ (700:500:100 = 1300)
+          return {
+            toppin: net * (700 / 1300),
+            meiji: net * (500 / 1300),
+            cheesecake_syrup: net * (100 / 1300)
+          };
         },
         badgeFormatter: (res) => `Toppin: ${res.toppin.toFixed(1)}g | นม: ${res.meiji.toFixed(1)}ml | Cheesecake Syrup: ${res.cheesecake_syrup.toFixed(1)}ml`
       },
@@ -784,7 +850,7 @@
         id: "thai_tea_milk",
         name: "ชาไทยนม (จากชาไทยเบส)",
         fullBatchYield: 1360,
-        allowedContainers: ['jug_large', 'jug_small', 'milk_gallon', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
         defaultContainer: 'jug_large',
         calc: (net) => {
           if (net <= 0) return { creamer: 0, thai_tea_powder: 0 };
@@ -796,10 +862,22 @@
         badgeFormatter: (res) => `Creamer: ${res.creamer.toFixed(1)}g | ผงชาไทย: ${res.thai_tea_powder.toFixed(1)}g`
       },
       {
+        id: "butterfly_pea_conc",
+        name: "Butterfly Pea Concentrate",
+        fullBatchYield: 127.5, // Water 125 ml + Butterfly pea 2.5 g
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
+        defaultContainer: 'squeeze_small',
+        calc: (net) => {
+          if (net <= 0) return { butterfly_pea: 0 };
+          return { butterfly_pea: net * (2.5 / 127.5) };
+        },
+        badgeFormatter: (res) => `Butterfly Pea: ${res.butterfly_pea.toFixed(2)}g`
+      },
+      {
         id: "sugar_syrup",
         name: "Sugar Syrup",
         fullBatchYield: 3000,
-        allowedContainers: ['jug_large', 'jug_small', 'milk_gallon', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
         defaultContainer: 'jug_large',
         calc: (net) => {
           if (net <= 0) return { sugar: 0 };
@@ -811,7 +889,7 @@
         id: "lime_base",
         name: "Limebase",
         fullBatchYield: 1200,
-        allowedContainers: ['jug_large', 'jug_small', 'milk_gallon', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
         defaultContainer: 'jug_large',
         calc: (net) => {
           if (net <= 0) return { lemonade_powder: 0 };
@@ -823,13 +901,14 @@
         id: "whipping_cream",
         name: "Whipping Cream",
         fullBatchYield: 540,
-        allowedContainers: ['jug_large', 'jug_small', 'milk_gallon', 'shaker', 'squeeze_small', 'squeeze_large', 'none'],
+        allowedContainers: BASE_ALLOWED_CONTAINERS,
         defaultContainer: 'jug_large',
         calc: (net) => {
           if (net <= 0) return { toppin: 0, butterscotch: 0 };
-          const rTop = 500 / 540;
-          const rBS = 40 / 540;
-          return { toppin: net * rTop, butterscotch: net * rBS };
+          return {
+            toppin: net * (500 / 540),
+            butterscotch: net * (40 / 540)
+          };
         },
         badgeFormatter: (res) => `Toppin: ${res.toppin.toFixed(1)}g | Butterscotch: ${res.butterscotch.toFixed(1)}g`
       }
@@ -855,12 +934,14 @@
       { id: "condensed_evap", name: "นมข้นจืด", directTare: 0, unit: "g", pkgCalc: (v) => v >= 369 ? `${Math.floor(v/369)} ขวด/กระป๋อง กับอีก ${(v%369).toFixed(1)}g` : (v > 0 ? `${v.toFixed(1)}g` : "-") },
       { id: "meiji", name: "MeijiRey (นมสด)", directTare: 75.0, unit: "ml", pkgCalc: (v) => v >= 2000 ? `${Math.floor(v/2000)} แกลลอน กับอีก ${(v%2000).toFixed(1)}ml` : (v > 0 ? `${v.toFixed(1)}ml` : "-") },
       { id: "choc_powder", name: "Chocolate Powder (ผงช็อค)", directTare: 0, unit: "g", pkgCalc: (v) => v >= 400 ? `${Math.floor(v/400)} ถุง กับอีก ${(v%400).toFixed(1)}g` : (v > 0 ? `${v.toFixed(1)}g` : "-") },
+      { id: "white_chocolate", name: "White Chocolate", directTare: 0, unit: "g", pkgCalc: () => "-" },
       { id: "vanilla_syrup", name: "Vanilla Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
       { id: "hazelnut_syrup", name: "Hazelnut Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
       { id: "salted_caramel_syrup", name: "Salted Caramel Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
       { id: "creamer", name: "Non dairy Creamer (ครีมเทียม)", directTare: 0, unit: "g", pkgCalc: () => "-" },
       { id: "lemonade_powder", name: "Lemonade Powder (ผงมะนาว)", directTare: 0, unit: "g", pkgCalc: () => "-" },
       { id: "thai_tea_powder", name: "ผงชาไทย", directTare: 0, unit: "g", pkgCalc: () => "-" },
+      { id: "butterfly_pea", name: "Butterfly Pea (ดอกอัญชัน)", directTare: 0, unit: "g", pkgCalc: () => "-" },
       { id: "soda", name: "Soda (โซดา)", directTare: 230.0, unit: "ml", pkgCalc: () => "-" },
       { id: "calamansi_syrup", name: "Calamansi Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
       { id: "tangerine_syrup", name: "Tangerine Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
@@ -868,7 +949,7 @@
       { id: "grape_syrup", name: "Grape Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
       { id: "cheesecake_syrup", name: "Cheesecake Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
       { id: "matcha_powder", name: "Matcha Powder (ผงมัจฉะ)", directTare: 0, unit: "g", pkgCalc: (v) => v >= 100 ? `${Math.floor(v/100)} ถุง กับอีก ${(v%100).toFixed(1)}g` : (v > 0 ? `${v.toFixed(1)}g` : "-") },
-      { id: "smoothie_powder", name: "Smoothie Powder", directTare: 0, unit: "g", pkgCalc: () => "-" },
+      { id: "smoothie_powder", name: "Smoothie Powder", directTare: 343.4, unit: "g", pkgCalc: () => "-" },
       { id: "cocoa_sauce", name: "Cocoa Sauce", directTare: 0, unit: "g", pkgCalc: () => "-" },
       { id: "brownbutter_syrup", name: "Brownbutter Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
       { id: "young_coconut_syrup", name: "Young Coconut Syrup", directTare: 0, unit: "ml", pkgCalc: () => "-" },
@@ -900,11 +981,14 @@
         card.id = `card-base-${cfg.id}`;
         card.innerHTML = `
           <div>
-            <div class="flex justify-between items-center mb-2">
-              <h3 class="font-bold text-slate-800 text-sm md:text-base">${cfg.name}</h3>
-              <div class="flex gap-1 flex-wrap justify-end">
-                ${cfg.hasLargeJugOption ? `
-                  <button onclick="addChamLargeJugRow()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded transition flex items-center gap-1 font-semibold" title="นมข้น 3 ขวด + นมข้นจืด 3 ขวด">
+            <div class="flex justify-between items-start gap-2 mb-2">
+              <div>
+                <h3 class="font-bold text-slate-800 text-sm md:text-base leading-tight">${cfg.name}</h3>
+                ${cfg.subLabel ? `<p class="text-[11px] text-amber-700 font-medium mt-0.5">${cfg.subLabel}</p>` : ''}
+              </div>
+              <div class="flex gap-1 flex-wrap justify-end shrink-0">
+                ${cfg.largeJugYield ? `
+                  <button onclick="addLargeJugRow('${cfg.id}')" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded transition flex items-center gap-1 font-semibold" title="เพิ่มปริมาณเต็ม 1 เหยือกใหญ่ให้อัตโนมัติ">
                     <i class="fa-solid fa-wine-bottle"></i> +1 เหยือกใหญ่
                   </button>
                 ` : ''}
@@ -975,10 +1059,15 @@
       calculateAll();
     }
 
-    function addChamLargeJugRow() {
-      const chamLargeJugYield = (505 * 3) + (369 * 3); // 2622g
-      dynamicRows['cham'].push({ id: Date.now() + Math.random(), tareKey: 'jug_large', grossWeight: chamLargeJugYield + CONTAINERS.jug_large.val });
-      renderBaseRows('cham');
+    function addLargeJugRow(baseId) {
+      const cfg = BASE_CONFIGS.find(c => c.id === baseId);
+      if (!cfg || !cfg.largeJugYield) return;
+      dynamicRows[baseId].push({
+        id: Date.now() + Math.random(),
+        tareKey: 'jug_large',
+        grossWeight: +(cfg.largeJugYield + CONTAINERS.jug_large.val).toFixed(2)
+      });
+      renderBaseRows(baseId);
       calculateAll();
     }
 
@@ -988,9 +1077,13 @@
       calculateAll();
     }
 
+    // แก้ไขให้รองรับการเปลี่ยน tareKey (String) และการกรอกตัวเลข grossWeight ได้ถูกต้อง
     function updateBaseRow(baseId, idx, field, value) {
-      const valNum = parseFloat(value) || 0;
-      dynamicRows[baseId][idx][field] = valNum;
+      if (field === 'tareKey') {
+        dynamicRows[baseId][idx].tareKey = value;
+      } else {
+        dynamicRows[baseId][idx][field] = parseFloat(value) || 0;
+      }
       calculateAll();
     }
 
@@ -1097,11 +1190,10 @@
     }
 
     function updateSyrupRow(syrupId, idx, field, value) {
-      const valNum = parseFloat(value) || 0;
       if (field === 'tareKey') {
         dynamicRows[syrupId][idx].tareKey = value;
       } else {
-        dynamicRows[syrupId][idx][field] = valNum;
+        dynamicRows[syrupId][idx][field] = parseFloat(value) || 0;
       }
       calculateAll();
     }
